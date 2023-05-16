@@ -16,8 +16,455 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+
+				<section>
+					<h1>Datastore Client APIs</h1>
+					<p>The application programmer's experience when using​ databases and other datastores</p>
+				</section>
+
+				<section>
+					<h1>The Gruen Effect</h1>
+					<h2 class="fragment">Software Architecture Edition</h2>
+					<p class="fragment">Developers search the web and, surrounded by a confusing array of options, lose track of their original requirements, making them susceptible to accepting whatever solution they browsed last.</p>
+				</section>
+
+				<section>
+					<section>
+						<h1>Datastore Client APIs</h1>
+						<p>Libraries you import/include in your program to interface with the external datastore.</p>
+					</section>
+
+					<section>
+						<p>The API will include functions to:</p>
+						<ul>
+							<li>Establish connection to datastore</li>
+							<li>Authenticate</li>
+							<li>Query</li>
+							<li>Insert/Update/Delete</li>
+							<li>Iterate records (usually by a "cursor" abstraction)</li>
+						</ul>
+						<p>... and more, varying according to the datastore.</p>
+					</section>
+
+					<section>
+						<p>Since the era of RDBMS dominance they've usually been called database drivers.</p>
+						<p>They are not true drivers though. I.e. not an OS kernel module that manages a hardware device such as disk drives, network interface card, graphics, USB hub, etc.</p>
+						<p>The term driver is still used, but more and more datastore products are referring to them as "Client Library", "API", or "<datastore product name> SDK" instead.</p>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Productivity & Tech Debt</h1>
+					</section>
+					<section>
+						<h2>Developer (un)productivity​</h2>
+						<p>No matter which app, the purpose and style of the application's code is not the same as the interface of datastore's API. This friction breaks the developer's concentration and slows the release time of every update that changes the datastore interaction.​</p>
+					</section>
+					<section>
+						<p>The disruption factor varies a lot according to which API is being used. Some are simpler and close to an application programming language's conventions. Others are their own rich, separate domain to the application.</p>
+					</section>
+					<section>
+						<h2>Technical debt​</h2>
+						<p>If you use it, you require other developers to have or pick up the same knowledge about it before they can contribute. And mandatory version upgrades in the future will require diligent analysis to assure the client API update doesn't break or subtly ruin the app.</p>
+					</section>
+					<section>
+						<p>Pick the datastore with the best client API for your staff and application requirements​<br>
+							=​​<br>
+							Development and release cycle is faster each time.</p>
+					</section>
+					<section>
+						<p>Your future tech debt will be lower when simpler client APIs are used.</p>
+					</section>
+				</section>
+
+				<section>
+					<h1>Grouping APIs by 'Look and feel'</h1>
+				</section>
+
+				<section>
+					<h1>Main styles of Datastore APIs</h1>
+					<ul>
+						<li>SQL, Relational</li>
+						<li>Document databases</li>
+						<li>Object stores</li>
+						<li>Spartan Key-Value</li>
+						<li>Timeseries</li>
+						<li>Search Engines</li>
+						<li>Graph</li>
+						<li>Native container wrappers</li>
+						<li>Embedded storage engine</li>
+						<li>Filesystem</li>
+					</ul>
+				</section>
+
+				<section>
+					<section>
+						<h1>Mashups between the main styles</h1>
+					</section>
+					<section>
+						<h2>Multi-model</h2>
+						<p>Mixtures of the previous types served by the same DBMS and its client APIs.</p>
+						<p>Eg. App A needs to use SQL but App B is easier to program if records handled as JSON objects. Some database servers with the capability to receive query and update in two APIs exist for this use-case.</p>
+					</section>
+					<section>
+						<h2>A lot of "A little bit of this in that"</h2>
+						<p>Without identifying as a multi-model product many databases have glued-on, often awkward extra APIs for interfaces of another family. Examples: JSON field type in a relational db; SQL-like table join function in an object db; Graph queries; pub/sub or streaming APIs; etc.​</p>
+						<p>Some of the out-of-family, extra API additions are not so awkward. Example: Basic text search index as an extra index type for tables/collections with string fields.</p>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>SQL</h1>
+					</section>
+					<section>
+						<pre><code>
+							import xyz_db_lib
+							conn = xyz_db_lib.connect(dbname=business_app_foo, user=appservice_acct_pqr)
+							cur = conn.cursor()
+							// DBA prior task: "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);" ①​
+							cur.execute("INSERT INTO test (num, data) VALUES (%s, %s)", (100, "abcdef")) ② ③
+							conn.commit() ④​
+							cur.execute("SELECT id, num, data FROM test;") ⑤​
+							print(cur.fetchone())
+							> (1, 100, "abcdef") ⑥
+						</code></pre>
+						<aside class="notes">
+							1.  GRANT CREATE TABLE … is usually only given to an account the DBA manually logs in with. The table object needs to be created first, and the expectations of the app must be in sync with what the table definition was made to be by the DBA.
+							2. SQL statements are strings that will be parsed server-side. Strings that are a computer language, inside your application code in another programming language.
+							3. So the app must format all vars into the string before sending, which is awkward code.
+							4. Transactions are used more in relational databases because normalized form often puts one business object in several tables. Multi-table transactions drive the latency of one op for the client, and place concurrency-guaranteeing burdens in the db server. Transactions with writes can block other clients too.
+							5. Again, SQL string in the middle of different language.
+							6. To use the returned results is typically more verbose than this example. Column names and types are metadata of the cursor result. Records don't have the column names as keys in them. It can be the other way but the original style of the cursor API is like a table - fixed cols and types, rows are all tuples of those same types they don't need the metadata each.
+						</aside>
+					</section>
+					<!-- section>
+						<ul>
+							<li>Programmer is obliged to learn SQL syntax and manage it, a separate language, as strings inside the application's actual programming language. CONTEXT SWITCH PENALTY.
+								SQL is widely used, has a standard that no-one keeps perfectly but most are close. LINGUA FRANCA?
+								Relational table concept is simple and appealing; suits a lot of cases.
+								SQL is first intuitive and easy; quickly becomes non-intuitive beyond easy level.
+								DB schema changes in the DBMS will require synchronous app version updates. MULTI-TEAM SYNCHRONIZATION NEEDED FOR SCHEMA MIGRATIONS.
+								App programmer sees the DB as a rigid thing. POWERLESSNESS
+								(Not shown) writing a generic function that dynamically accepts any table's record definitions is verbose and time-consuming to write, and hard to get right.
+								Relational table normalized forms require multi-table operations within transactions.</li>
+						</ul>
+					</!-->
+					<!-- section>
+						<ul>
+							<li>Complex, large aggregations can be done server-side.</li>
+						</ul>
+					</!-->
+				</section>
+
+				<section>
+					<section>
+						<h1>Document Database</h1>
+					</section>
+					<section>
+						<pre><code>
+							import xyz_db_lib
+							db = xyz_db_lib.connect(dbname=business_app_foo, user=appservice_acct_pqr)
+							cr_array = [ "Xxx", "Yyy", "Zzz" ]
+							x = { id: "HSD-10422932", child_recs: cr_array, created: date.now() } ①
+							db.foo_collection.insert(x) ② ③​
+							print(db.bar_collection.findOne({ id: "SKE-54293450"})) ④​
+							> { id: "SKE-54293450", field_a: …, field_b: …. } ⑤
+						</code></pre>
+						<aside class="notes">
+							1. Native variable types of the programming language are used as-is (so long as they are a datatype in the db). No translation to another type needed. It's just your object, no transformation to a record type is required. When you fetch it back it will be the same without extra deserialization code needing to be written. However, if your code has a datatype that the db doesn't support that is another matter.
+							2. Typically the db will auto-create table/collections as soon as a write command is executed on them
+							3. Typically any schema object can be inserted. This means the app devs can change the schema without DBA requests.
+							4. Queries are with objects (this case a simple 'fieldX = valueY' rule by way of map with a single key->value pair) of the programming language
+							5. The results come back as a native object. Not a record tuple type which is a little bit more verbose
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Object Stores</h1>
+					</section>
+					<section>
+						<pre><code>
+							import xyz_cloudapi_lib
+							client = xyz_cloudapi_lib.connect() ①
+							client.auth(client_key: xxxx, secret: …...) ②
+							obj_api = client.api_select('object_store') ③​
+							foo_bucket = obj_api.select_bucket('foo') ④​
+							foo_bucket.upload_object(path: 'app_foo/records/' + x.id, x.serialize()) ⑤ ⑥ ⑦
+							y = deserialize(foo_bucket.get_object(path: app_foo/records/' + y_id)) ⑥ ⑧
+						</code></pre>
+						<aside class="notes">
+							1. You're making a HTTP connection and every operation is a HTTP request. So firstly each request is slower than a db driver like ODBC or mongo wire protocol. Secondly Error handling will be HTTP error handling, or getting a well-formed but proprietary error response to parse and deal with.​
+							2. Stricter authentication at the base level; no simple username+password option
+							3. Might be one of many services in a cloud provider
+							4. Buckets. Equivalent organizational entity to collection/tables.
+							5. You need to choose a key/path for each object. Need to share that same logic amongst all app code.
+							6. You have to serialize and deserialize the objects. Some common formats such as JSON will have simple ways to do it though
+							7. No object format (schema control) enforced by the API
+							8. There is no query support such 'find objects with field_A = value_X'. You can only retrieve or update by the primary key.
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Spartan Key-value</h1>
+					</section>
+					<section>
+						<pre><code>
+							import xyz_kv_lib
+							db = xyz_kv_lib.connect(dbname=business_app_foo, user=appservice_acct_pqr) ①
+							x = { id: "HSE-18414513", child_recs: [ "a", "b", c"], created: date.now() } ②
+							db.set(x.id, serialize(x)); ② ③
+							y = deserialize(db.get("MER-27620021")) ② ③​
+							db.delete("xxx-….") ③​
+							csr = db.list_keys() ③ ④​
+							for k in csr: do …. ④
+						</code></pre>
+						<aside class="notes">
+							1. The context object could be a single namespace or a table, it varies between different servers
+							2. Use your own objects. But stereotypically you have to serialize and deserialize them; and if the objects are complex then there will be migration complexity - old records have the old format, new ones have the new, how to detect, update policy? Etc.
+							3. set(), get(), delete(), list_keys() is all there is the idealized KV server
+							4. There is no general query syntax to use to find values with property x or property y. There is only fetching by key, or iterating all keys.
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Timeseries database</h1>
+					</section>
+					<section>
+						<pre><code>
+							//Data is typically inserted by other continuously-running services ①​
+							import xyz_tsdb_lib
+							tsdb_conn = tsdb.open(host_url) ②​
+							ts_span = [ Date("2023-03-24T08:55:00Z"), Date("2023-03-24T09:00:00Z") ] ③​
+							resolution = "10s" ③​
+							qry = 'rate(metric_abc{host="foo"})' ④​
+							ts_qry_result = tsdb_conn.query(ts_span, resolution, qry) ③​
+							print(ts_qry_result) ⑤​
+							> [ [1679648100, 4562], [1679648110, 1040], [1679648120, 3890],  … , [1679648390, 8261], [1679648400, 7342] ]
+						</code></pre>
+						<aside class="notes">
+							1. As mentioned in the comment. Because monitoring seems to be the most common
+							2. There are both HTTP and custom or ODBC db drive type connections. The HTTP ones don't seem require auth by default. At least the ones typically used for monitoring.
+							3. A time range to query on and the resolution (interval) to return the timeseries samples is always required.
+							4. There is query syntax. Aggregations on counter or gauge timeseries values. Often much more complex than this example.
+							5. The result is an array of &lt;timestamp&gt;, &lt;value&gt; pairs. The timestamp is forced to be round steps by resolution argument and the values likewise - either latest-before value, nearest value, extrapolated value between two nearest samples, etc.
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Graph database</h1>
+					</section>
+					<section>
+						<pre><code>
+							// Connection etc. The same as SQL or a document db API
+							// DBA prior task: "CREATE NODE_TYPE Person (...); CREATE NODE_TYPE Team (…); CREATE EDGE_TYPE TeamMembership (…); CREATE GRAPH OrgChart (Person, TeamMembership, Team)" ①
+							p1 = [10320, "smith", "john"]
+							db.execute("INSERT Person (%s, %s, %s)", new_p) ②​
+							t1 = ["ACME", "UK", "Risk"]
+							db.execute("INSERT TeamMembership(%s, %s, %s)", p1.id, t1)) ③​
+							person_cur = db.execute('SELECT Person-[TeamMembership]->Team(%s)', t1); ④​
+							print(person_cur.fetchone())
+							> (10414, "kelly", "jane")
+						</code></pre>
+						<aside class="notes">
+							1. ???
+							2. ????
+							3. ???
+							4. ???
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Embedded Storage Engine</h1>
+					</section>
+					<section>
+						<p>If the application ...</p>
+						<ul>
+							<li>Doesn't share data with other instances</li>
+							<li>Doesn't require durability guarantees above that of the local filesystem</li>
+							<li>A minimal query engine functionality is acceptable</li>
+						</ul>
+						<p>... it could use a storage engine, embedded in itself, instead of connecting to an external datastore</p>
+					</section>
+					<section>
+						<pre><code>
+							.... TODO ....
+						</code></pre>
+					</section>
+				</section>
+
+				<section>
+					<h1>Pros and Cons of different API types</h1>
+				</section>
+
+				<section>
+					<section>
+						<h2>Aggregations / Analytical processing in the datastore</h2>
+					</section>
+					<section>
+						<p>Different datastores offer different levels of server-side analytical processing.</p>
+						<p>Because the functionality is implemented server-side this is not about Client APIs in sense, but there is correlation to the categories.</p>
+					</section>
+					<section>
+						<ul>
+							<li>Key-value and Object stores have none.</li>
+							<li>Relational databases offer the most as a general rule, but there are some toy-sized relational databases that don't have much.</li>
+							<li>Document databases offer a lot to a medium amount depending on which.</li>
+							<li>Timeseries databases have a lot, for their scope.</li>
+							<li>Graph databases have a medium amount.</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Schema control freedom</h2>
+					</section>
+					<section>
+						<p>Some datastores restrict the schema. The tables and the field names and types of records/objects in them.</p>
+						<p>If applications insert a record that has an unknown field or is missing a field that is mandatory the entire request will be rejected and exception sent back to the client application.</p>
+						<p>Relational databases are well-known for popularizing this feature.</p>
+						<p>N/A for datastores that do not distinguish fields within records/objects. Eg. Object stores, key-value stores.</p>
+					</section>
+					<section>
+						<p>Positives of server-side locked schema:</p>
+						<ul>
+							<li>Guarantees that all applications connecting to the same backend datastore obey a single schema orthodoxy.</li>
+						</ul>
+					</section>
+					<section>
+						<p>Negatives of server-side locked schema:</p>
+						<ul>
+							<li>Updates to the schema require two teams, DBA and app developers, to work in sync to change and release schema changes. (Typically adds a month, not just a week or days, to releases.)</li>
+							<li>Schema changes normally require synchronized downtime for both the datastore and the applications.</li>
+						</ul>
+					</section>
+					<section>
+						<p>Datastore-enforced schema<br>
+							Error sent to application on violation</p>
+						<ul>
+							<li>Relational (SQL)</li>
+							<li>Graph</li>
+							<li class="na_ish">Timeseries</li>
+						</ul>
+						<p>The general rule is shown, but exceptions exist in both sides. Eg. Some document databases have a command to add a schema validation check on a collection.</p>
+					</section>
+					<section>
+						<p>Free schema (aside from mandatory PK)<br>
+							Application freely modifies schema</p>
+						<ul>
+							<li>Document databases</li>
+							<li class="na_ish">Object stores</li>
+							<li class="na_ish">Key-value</li>
+						</ul>
+						<p>The general rule is shown, but exceptions exist in both sides. Eg. Some document databases have a command to add a schema validation check on a collection.</p>
+					</section>
+					<section>
+						<p>The opposite to the datastore backend enforced single schema is the "flexible schema" paradigm most 'NoSQL' databases offered.</p>
+						<p>It also applies to object stores and key-value servers, in a sense. The server observes no fields inside the value, hence no schema control.</p>
+					</section>
+				</section>
+
+				<section>
+					<h2>Query Language vs library-like API</h2>
+					<ul>
+						<li>....</li>
+					</ul>
+				</section>
+
+				<section>
+					<h1>Connections</h1>
+				</section>
+
+				<section>
+					<section>
+						<h2>Connection behaviour</h2>
+						<p>The behaviour of an APIs client-server connections is an important feature.</p>
+					</section>
+					<section>
+						<p>Connection behaviour is a different dimension to the code:</p>
+						<ul>
+							<li>You don't program it</li>
+							<li>The client API either supports some connection mode or it doesn't.</li>
+							<li>Using different modes is more often a matter of config files rather than code lines.</li>
+						</ul>
+					</section>
+					<section>
+						<p>Reading above the app developer might feel 'I'm powerless here; I'll skip thinking about it for now.'</p>
+						<p>Don't do that!</p>
+						<p>Be aware of what you get with different client APIs - what they support significantly changes the way the application is managed in live operation / meets business requirements.</p>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Connection Protocols</h2>
+						<p>The type of network protocol a database / datastore client API uses affects</p>
+						<ul>
+							<li>Performance</li>
+							<li>Failure response</li>
+						</ul>
+					</section>
+					<section>
+						<p>Connections that stay open provide the best latency. No need to reestablish TCP connection or authentication context for each request sent.</p>
+					</section>
+					<section>
+						<p>Client APIs that have automatic failover (eg. old primary lost, finds new primary automatically) provide a large benefit for business continuity goals. Options to auto-retry interrupted requests save the app developer from writing a lot of error handling.</p>
+					</section>
+					<section>
+						<ul>
+							<li>Custom wire protocol over TCP</li>
+							<li>HTTP1.x</li>
+							<li>HTTP2 Streaming</li>
+							<ul>
+								<li>GRPC</li>
+							</ul>
+						</ul>
+					</section>
+					<section>
+						<p>Databases that have replication (primary+secondaries, or 'multi-master', or master+slave, main+standby, etc) often support rolling restart procedures. <b>This is a very important cost-of-operations advantage.</b></p>
+						<p>If the client API seamlessly switches to new primary as the role changes during maintenance restarts you gain a huge operational advantage: DBAs can do maintenance such as upscaling to new servers, upgrading versions etc. without shutting down the frontend application. I.e. without stopping the business or dragging the app dev team into the task.</p>
+					</section>
+					<section>
+						<h2>Connection Security</h2>
+						<ul>
+							<li>Network encryption</li>
+							<li>Authentication</li>
+							<ul>
+								<li>Classic account name + password</li>
+								<li>Certificate</li>
+								<li>Federated Authentication</li>
+							</ul>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Client-side encryption</h1>
+					</section>
+					<section>
+						<p>To protect against information theft an application can store already-encrypted data in the database / datastore. Hacking the database server, or its backups, becomes pointless.</p>
+						<p>Something to consider for applications that have security requirements so high they can't even trust the DBA team / DBAAS provider.</p>
+						<p>Storing encrypted data makes the database 'dumber' though. Eg. querying a record set by range X1 to X2 cannot use efficient index lookup if "X" is an encrypted value</p>
+					</section>
+					<section>
+						<p>A few database APIs have added the crypto functions to the database API itself. This is an alternative to using a general-purpose crypto library to manually do the encryption and decryption steps.</p>
+						<p>The API cannot auto-magic the work away though. The tech debt rises just as much as if you do manual encryption. The main burden is the key management, i.e. the IT security team needs to manage the certs and distribute new and periodically renewed certs to the application servers, and the application team have to work with them when they do that.</p>
+					</section>
+				</section>
+
 			</div>
 		</div>
 
