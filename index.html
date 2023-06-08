@@ -25,30 +25,31 @@
 				<section>
 					<h1>Datastore<br>
 						Client APIs</h1>
+					<p>The app dev's datastore <br>
+						🛒 shopping guide</p>
 				</section>
 
-				<section>
-					<h4>Overview</h4>
+				<section><!-- Overview -->
+					<h3>Overview</h3>
 					<ul>
 						<li>What are Datastore Client APIs?</li>
 						<li>Productivity & Tech Debt</li>
 						<li>APIs grouped by main styles</li>
-						<li>Pros and consof different features</li>
+						<li>Pros and cons of features X, Y & Z ...</li>
 						<li>Connection protocols</li>
 						<li>Security</li>
 					</ul>
 				</section>
 
-				<section>
+				<section><!-- What is a Datastore API? -->
 					<h3>What is a Datastore API?</h3>
-					<p class="fragment">Libraries you import/include in your program to interface with the external datastore.</p>
+					<p class="fragment">Libraries you import/include in your program to interface with the external datastore</p>
 					<ul class="fragment">
 						<li>ODBC 'driver'</li>
-						<li>NoSQL database API</li>
+						<li>NoSQL database or KV API</li>
 						<li>HTTP REST API</li>
 						<li>Embedded storage engine API</li>
-						<li>Native datatype wrapper</li>
-						<li>Filesystem</li>
+						<li>Filesystem API</li>
 						<li>etc.</li>
 					</ul>
 				</section>
@@ -56,11 +57,11 @@
 				<section>
 					<p>The API will include functions to:</p>
 					<ul>
-						<li>Establish connection to datastore</li>
+						<li>Open network connection to datastore</li>
 						<li>Authenticate</li>
 						<li>Query</li>
 						<li>Insert/Update/Delete</li>
-						<li>Iterate records (usually by a "cursor" abstraction)</li>
+						<li>Iterate records</li>
 					</ul>
 					<p>... and more, varying according to the datastore.</p>
 				</section>
@@ -78,10 +79,16 @@
 					</aside>
 				</section>
 
-				<section>
+				<section data-auto-animate><!-- Gruen Effect -->
 					<h2>The Gruen Effect</h2>
-					<h4>Software Architecture Edition</h4>
-					<p class="fragment">“Developers search the web and, surrounded by a confusing array of options, lose track of their original requirements, making them susceptible to accepting whatever solution they browsed last.”</p>
+					<h4 data-auto-animate-id="gest">...</h4>
+					<p data-auto-animate-id="geq">Consumers enter a shopping mall or store and, surrounded by an intentionally confusing layout, lose track of their original intentions, making them more susceptible to making impulse buys</p>
+				</section>
+
+				<section data-auto-animate><!-- Gruen Effect -->
+					<h2>The Gruen Effect</h2>
+					<h4 data-auto-animate-id="gest">Software Architecture Edition</h4>
+					<p data-auto-animate-id="geq">Developers search the web and, surrounded by a confusing array of options, lose track of their original requirements, making them susceptible to accepting whatever solution they browsed last.</p>
 				</section>
 
 				<section>
@@ -93,21 +100,22 @@
 				</section>
 				<section>
 					<p>The disruption level varies according to which API is being used.</p>
-					<p>Some are simpler and close to an application programming language's conventions.</p>
+					<p>Some APIs are simple, and close to an application programming language's normal conventions.</p>
 					<p>Others are their own rich, separate domain to the application.</p>
 				</section>
 				<section>
 					<h2>Technical debt</h2>
 					<p>If you use it, you require other developers to have or pick up the same knowledge about it before they can contribute.</p>
-					<p>If you avoid a complex API future enhancements and bug fixes will be quicker.</p>
 				</section>
 				<section>
 					<p>Pick the datastore with the best client API for your staff and application requirements<br>
 						=<br>
-						Development and release cycle is faster each time.</p>
+						Development and release cycle is faster each time</p>
 				</section>
 				<section>
-					<p>Your future tech debt will be lower when simpler client APIs are used.</p>
+					<p>Picking the simplest client API that meets requirements<br>
+						=<br>
+						Lower application tech debt in future</p>
 				</section>
 
 				<section><!-- Styles of Datastore APIs -->
@@ -116,12 +124,14 @@
 
 				<section>
 					<h2>Main styles of Datastore APIs</h2>
-					<ul>
+					<ul style="display: inline-block">
 						<li>SQL, Relational</li>
 						<li>Document databases</li>
 						<li>Object stores</li>
 						<li>Spartan Key-Value</li>
 						<li>Timeseries</li>
+					</ul>
+					<ul style="display: inline-flexbox">
 						<li>Search Engines</li>
 						<li>Graph</li>
 						<li>Native container wrappers</li>
@@ -129,13 +139,33 @@
 						<li>Filesystem</li>
 					</ul>
 				</section>
+
 				<section>
-					<h2>Mashups between the main styles</h2>
+					<h2>&hellip; plus the 'Mashups'</h2>
 				</section>
+
 				<section>
 					<h2>Multi-model</h2>
-					<p>Mixtures of the previous types served by the same DBMS and its client APIs.</p>
-					<p>Eg. App A needs to use SQL but App B is easier to program if records handled as JSON objects. Some database servers have dual APIs to support this.</p>
+					<p>Mixtures of the previous types served by the same datastore and competing client APIs.</p>
+					<p>Eg. App A needs to use SQL but App B is easier to program if records handled as JSON objects.</p>
+				</section>
+				<section>
+					<h2>Competing APIs</h2>
+					<p>Example for MySQL by ODBC</p>
+					<pre><code data-trim>
+						db_conn = pyodbc.connect("Server=....;Database=test;....")
+						cursor = db_conn.cursor()
+						cursor.execute(
+							"INSERT INTO my_table (name, dim_x) VALUES (?, ?)", 
+							"foo", 19)
+					</code></pre>
+					<p>&hellip; vs X DevAPI</p>
+					<pre><code data-trim>
+						mySession = mysqlx.get_session({"host": ..., ...  })
+						myDb = mySession.get_schema('test')
+						myColl = myDb.get_collection('my_table')
+						myColl.add({ 'name': 'foo', 'dim_x': 19 }).execute()
+					</code></pre>
 				</section>
 				<section>
 					<h2>A lot of "A little bit of this in that"</h2>
@@ -234,6 +264,7 @@
 							6. You have to serialize and deserialize the objects. Some common formats such as JSON will have simple ways to do it though
 							7. No object format (schema control) enforced by the API
 							8. There is no query support such 'find objects with field_A = value_X'. You can only retrieve or update by the primary key.
+							(Amazon's S3 Select, Athena or Redshift are layers on top of S3 that run close to S3 object storage servers, they are not object stores themself.)
 						</aside>
 					</section>
 				</section>
