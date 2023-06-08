@@ -8,82 +8,109 @@
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+		<link rel="stylesheet" href="dist/theme/dracula.css">
 
 		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+		<link rel="stylesheet" href="plugin/highlight/vs2015.css">
 	</head>
 	<body>
 		<div class="reveal">
 			<div class="slides">
 
 				<section>
-					<h1>Datastore Client APIs</h1>
-					<p>The application programmer's experience when using​ databases and other datastores</p>
+					<h1>Datastore<br>
+						Client APIs</h1>
 				</section>
 
 				<section>
-					<h1>The Gruen Effect</h1>
-					<h2 class="fragment">Software Architecture Edition</h2>
-					<p class="fragment">Developers search the web and, surrounded by a confusing array of options, lose track of their original requirements, making them susceptible to accepting whatever solution they browsed last.</p>
+					<h4>Overview</h4>
+					<ul>
+						<li>What are Datastore Client APIs?</li>
+						<li>Productivity & Tech Debt</li>
+						<li>APIs grouped by main styles</li>
+						<li>Pros and consof different features</li>
+						<li>Connection protocols</li>
+						<li>Security</li>
+					</ul>
 				</section>
 
 				<section>
-					<section>
-						<h1>Datastore Client APIs</h1>
-						<p>Libraries you import/include in your program to interface with the external datastore.</p>
-					</section>
-
-					<section>
-						<p>The API will include functions to:</p>
-						<ul>
-							<li>Establish connection to datastore</li>
-							<li>Authenticate</li>
-							<li>Query</li>
-							<li>Insert/Update/Delete</li>
-							<li>Iterate records (usually by a "cursor" abstraction)</li>
-						</ul>
-						<p>... and more, varying according to the datastore.</p>
-					</section>
-
-					<section>
-						<p>Since the era of RDBMS dominance they've usually been called database drivers.</p>
-						<p>They are not true drivers though. I.e. not an OS kernel module that manages a hardware device such as disk drives, network interface card, graphics, USB hub, etc.</p>
-						<p>The term driver is still used, but more and more datastore products are referring to them as "Client Library", "API", or "<datastore product name> SDK" instead.</p>
-					</section>
+					<h3>What is a Datastore API?</h3>
+					<p class="fragment">Libraries you import/include in your program to interface with the external datastore.</p>
+					<ul class="fragment">
+						<li>ODBC 'driver'</li>
+						<li>NoSQL database API</li>
+						<li>HTTP REST API</li>
+						<li>Embedded storage engine API</li>
+						<li>Native datatype wrapper</li>
+						<li>Filesystem</li>
+						<li>etc.</li>
+					</ul>
 				</section>
 
 				<section>
-					<section>
-						<h1>Productivity & Tech Debt</h1>
-					</section>
-					<section>
-						<h2>Developer (un)productivity​</h2>
-						<p>No matter which app, the purpose and style of the application's code is not the same as the interface of datastore's API. This friction breaks the developer's concentration and slows the release time of every update that changes the datastore interaction.​</p>
-					</section>
-					<section>
-						<p>The disruption factor varies a lot according to which API is being used. Some are simpler and close to an application programming language's conventions. Others are their own rich, separate domain to the application.</p>
-					</section>
-					<section>
-						<h2>Technical debt​</h2>
-						<p>If you use it, you require other developers to have or pick up the same knowledge about it before they can contribute. And mandatory version upgrades in the future will require diligent analysis to assure the client API update doesn't break or subtly ruin the app.</p>
-					</section>
-					<section>
-						<p>Pick the datastore with the best client API for your staff and application requirements​<br>
-							=​​<br>
-							Development and release cycle is faster each time.</p>
-					</section>
-					<section>
-						<p>Your future tech debt will be lower when simpler client APIs are used.</p>
-					</section>
+					<p>The API will include functions to:</p>
+					<ul>
+						<li>Establish connection to datastore</li>
+						<li>Authenticate</li>
+						<li>Query</li>
+						<li>Insert/Update/Delete</li>
+						<li>Iterate records (usually by a "cursor" abstraction)</li>
+					</ul>
+					<p>... and more, varying according to the datastore.</p>
 				</section>
 
 				<section>
+					<p>Old days: "Database driver"</p>
+					<p>(Not true drivers though)</p>
+					<p>Recently also called the following:</p>
+					<ul>
+						<li>Client library</li>
+						<li>API</li>
+						<li>&lt;Product name&gt; SDK</li>
+					<aside class="notes">
+						Not an OS kernel module that that manages a hardware device such as disk drives, network interface card, graphics, USB hub, etc.
+					</aside>
+				</section>
+
+				<section>
+					<h2>The Gruen Effect</h2>
+					<h4>Software Architecture Edition</h4>
+					<p class="fragment">“Developers search the web and, surrounded by a confusing array of options, lose track of their original requirements, making them susceptible to accepting whatever solution they browsed last.”</p>
+				</section>
+
+				<section>
+					<h1>Productivity & Tech Debt</h1>
+				</section>
+				<section>
+					<h2>Developer (un)productivity</h2>
+					<p>No matter which app, the purpose and style of the application's code is not the same as the interface of datastore's API. This friction breaks the developer's concentration and slows the release time of every update that changes the datastore interaction.​</p>
+				</section>
+				<section>
+					<p>The disruption level varies according to which API is being used.</p>
+					<p>Some are simpler and close to an application programming language's conventions.</p>
+					<p>Others are their own rich, separate domain to the application.</p>
+				</section>
+				<section>
+					<h2>Technical debt</h2>
+					<p>If you use it, you require other developers to have or pick up the same knowledge about it before they can contribute.</p>
+					<p>If you avoid a complex API future enhancements and bug fixes will be quicker.</p>
+				</section>
+				<section>
+					<p>Pick the datastore with the best client API for your staff and application requirements<br>
+						=<br>
+						Development and release cycle is faster each time.</p>
+				</section>
+				<section>
+					<p>Your future tech debt will be lower when simpler client APIs are used.</p>
+				</section>
+
+				<section><!-- Styles of Datastore APIs -->
 					<h1>Grouping APIs by 'Look and feel'</h1>
 				</section>
 
 				<section>
-					<h1>Main styles of Datastore APIs</h1>
+					<h2>Main styles of Datastore APIs</h2>
 					<ul>
 						<li>SQL, Relational</li>
 						<li>Document databases</li>
@@ -97,24 +124,21 @@
 						<li>Filesystem</li>
 					</ul>
 				</section>
-
 				<section>
-					<section>
-						<h1>Mashups between the main styles</h1>
-					</section>
-					<section>
-						<h2>Multi-model</h2>
-						<p>Mixtures of the previous types served by the same DBMS and its client APIs.</p>
-						<p>Eg. App A needs to use SQL but App B is easier to program if records handled as JSON objects. Some database servers with the capability to receive query and update in two APIs exist for this use-case.</p>
-					</section>
-					<section>
-						<h2>A lot of "A little bit of this in that"</h2>
-						<p>Without identifying as a multi-model product many databases have glued-on, often awkward extra APIs for interfaces of another family. Examples: JSON field type in a relational db; SQL-like table join function in an object db; Graph queries; pub/sub or streaming APIs; etc.​</p>
-						<p>Some of the out-of-family, extra API additions are not so awkward. Example: Basic text search index as an extra index type for tables/collections with string fields.</p>
-					</section>
+					<h2>Mashups between the main styles</h2>
+				</section>
+				<section>
+					<h2>Multi-model</h2>
+					<p>Mixtures of the previous types served by the same DBMS and its client APIs.</p>
+					<p>Eg. App A needs to use SQL but App B is easier to program if records handled as JSON objects. Some database servers have dual APIs to support this.</p>
+				</section>
+				<section>
+					<h2>A lot of "A little bit of this in that"</h2>
+					<p>Without identifying as a multi-model many datastores have glued-on, often awkward extra APIs for interfaces of another family. Examples: JSON field type in a relational db; SQL-like table join function in an object db; Graph queries; pub/sub or streaming APIs; etc.​</p>
+					<p>Some of the out-of-family, extra API additions are not so awkward. Example: Basic text search index as an extra index type for tables/collections with string fields.</p>
 				</section>
 
-				<section>
+				<section><!-- SQL -->
 					<section>
 						<h1>SQL</h1>
 					</section>
@@ -158,7 +182,7 @@
 					</!-->
 				</section>
 
-				<section>
+				<section><!-- Doc DBs-->
 					<section>
 						<h1>Document Database</h1>
 					</section>
@@ -182,7 +206,7 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- Object Stores -->
 					<section>
 						<h1>Object Stores</h1>
 					</section>
@@ -209,9 +233,9 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- Key-value -->
 					<section>
-						<h1>Spartan Key-value</h1>
+						<h1>Key-value</h1>
 					</section>
 					<section>
 						<pre><code>
@@ -233,7 +257,7 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- Timeseries db -->
 					<section>
 						<h1>Timeseries database</h1>
 					</section>
@@ -259,7 +283,7 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- Graph dbs -->
 					<section>
 						<h1>Graph database</h1>
 					</section>
@@ -284,7 +308,7 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- Embedded Storage Engine -->
 					<section>
 						<h1>Embedded Storage Engine</h1>
 					</section>
@@ -304,11 +328,11 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- "Pros and cons" -->
 					<h1>Pros and Cons of different API types</h1>
 				</section>
 
-				<section>
+				<section><!-- Server-side analytical functions -->
 					<section>
 						<h2>Aggregations / Analytical processing in the datastore</h2>
 					</section>
@@ -327,7 +351,7 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- Schema free -->
 					<section>
 						<h2>Schema control freedom</h2>
 					</section>
@@ -376,14 +400,14 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- Complex query language -->
 					<h2>Query Language vs library-like API</h2>
 					<ul>
 						<li>....</li>
 					</ul>
 				</section>
 
-				<section>
+				<section><!-- Connections -->
 					<h1>Connections</h1>
 				</section>
 
@@ -450,7 +474,7 @@
 					</section>
 				</section>
 
-				<section>
+				<section><!-- Client-side encryption -->
 					<section>
 						<h1>Client-side encryption</h1>
 					</section>
