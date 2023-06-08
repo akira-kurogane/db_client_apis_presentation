@@ -16,6 +16,11 @@
 			.na_ish {
 				opacity: 0.5;
 			}
+			.shrink_strike_fade {
+				font-size: 90%;
+				text-decoration: line-through;
+				opacity: 0.5;
+			}
 		</style>
 	</head>
 	<body>
@@ -415,9 +420,135 @@
 					</ul>
 				</section>
 
+				<section><!-- Server-side analytical functions -->
+					<h2>Aggregations / Analytical processing in the datastore</h2>
 				</section>
+				<section data-auto-animate>
+					<h3>Minimal functionality of datastores</h3>
+					<h4>Database</h4>
+					<ul>
+						<li>Create, drop, list tables</li>
+						<li>Define fields in each table</li>
+						<li>Update, select, delete and iterate records in table</li>
+						<li>Select records by any field's values (not just primary key)</li>
+						<li>Return subset of fields in records</li>
+					</ul>
+					<aside class="notes">
+						<p>Different datastores offer different levels of server-side analytical processing.</p>
+						<p>Because the functionality is implemented server-side this is not about Client APIs in sense, but there is correlation to the categories.</p>
+					</aside>
+				</section>
+				<section data-auto-animate>
+					<h3>Minimal functionality of datastores</h3>
+					<h4 class="shrink_strike_fade">Database</h4>
+					<h4>Object store, Key-value store, or Fileystem:</h4>
+					<ul>
+						<li class="shrink_strike_fade">Create, drop, list tables</li>
+						<li>Put, retrieve, delete and list objects/files/values</li>
+						<li class="shrink_strike_fade">Define fields in each table</li>
+						<li class="shrink_strike_fade">Update, select, delete and iterate records in table</li>
+						<li class="shrink_strike_fade">Select records by any field's values</li>
+						<li>Single id/key for lookup</li>
+						<li class="shrink_strike_fade">Return subset of fields in records</li>
+					</ul>
+					<aside class="notes">
+						<p>Different datastores offer different levels of server-side analytical processing.</p>
+						<p>Because the functionality is implemented server-side this is not about Client APIs in sense, but there is correlation to the categories.</p>
+					</aside>
+				</section>
+				<section>
+					<h3>Some datastores have no A.P.</h3>
+					<div>By definition object stores, key-value stores, and fileystems provide no analytical processing</div>
+					<div>Client: fetch whole dataset, deserialize, run analytical function</div>
+				</section>
+				<section>
+					<h3>Minimal database: Basically no A.P.</h3>
+					<div>A hypothetical minimal database adds:</div>
+					<ul>
+						<li>Filter records by any field's values<br>(not just primary key)</li>
+						<li>Return subset of fields in records</li>
+					</ul>
+					<aside class="notes">
+						There are some toy databases like this. But just filtering isn't analytical work.
+					</aside>
+				</section>
+				<section>
+					<h3>Typical database: Plain aggregation</h3>
+					<ul>
+						<li>Transformations such as:
+							<ul>
+								<li>"SELECT COUNT(*) ..." -> return one number</li>
+								<li>"SELECT MAX(*) ..." -> return one scalar value</li>
+							</ul>
+						</li>
+						<li>Sorting such as:
+							<ul>
+								<li>"SELECT ... ORDER BY ... LIMIT 10"<br>
+									tbl_abc.read({..}, {$sort: {...}, $limit: 10})</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Typical database: Plain aggregation (cont.)</h3>
+					<ul>
+						<li>Grouping aggregations:
+							<ul>
+								<li>"SELECT x, SUM(y) ... GROUP BY x ... HAVING ..."<br>
+									tbl_abc.aggregate([{$match: {..}}, {$groupBy: {xxx, {$sum: ...}}}, ...])</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Mature database: Richer aggregation</h3>
+					<ul>
+						<li>Windowing aggregations:
+							<ul>
+								<li>"SELECT ... WINDOW foo AS (PARTITION BY ... PRECEDING / EXCLUDING / etc. ...)"<br>
+									tbl_abc.aggregate([{...}, {$groupBy: {, $bucket:{opX, opY, ...}}, ...}}, ...])</li>
+							</ul>
+						</li>
+						<li>Temporary tables and CTEs</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Mature database: User funcs, simple algorithmic</h3>
+					<ul>
+						<li>Stored procedures</li>
+						<li>User-defined functions</li>
+					</ul>
+					</ul>
+				</section>
+				<section>
+					<h3>User experience</h3>
+					<ul>
+						<li>🙂 'Yay, database can do this for me!'</li>
+						<li>😓 Aggregation syntax complex, different domain language</li>
+						<li>🙁 Large aggregations impact latency for every client</li>
+						<li>😞 Algorithmic capability low</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Performance summary</h3>
+					<ul>
+						<li>😐 Load consolidated in database server</li>
+						<li>🙂 Database record filtering efficient</li>
+						<li>🙂 Database aggregation efficient</li>
+						<li>🫤 Algorithmic processing not so efficient</li>
+					</ul>
+				</section>
+				<!-- section>
+					<ul>
+						<li>Key-value and Object stores have none.</li>
+						<li>Relational databases offer the most as a general rule, but there are some toy-sized relational databases that don't have much.</li>
+						<li>Document databases offer a medium amount to a lot, depending on which.</li>
+						<li>Timeseries databases have a lot, for their scope.</li>
+						<li>Graph databases have a medium amount.</li>
+					</ul>
+				</section -->
 
-				<section><!-- Complex query language -->
+				<!-- section><! -- Complex query language -- >
 					<h2>Complexity level of API</h2>
 				</section>
 				<section>
@@ -430,7 +561,7 @@
 				<section>
 					<h3>Complex functionality in datastore</h3>
 					<p>Example: RDBMS with fully-evolved SQL syntax suport. Stored Procedures. Secondary indexes. Query plan optimizations</p>
-				</section>
+				</section -->
 
 				<section><!-- Connections -->
 					<h2>Connections</h2>
