@@ -368,72 +368,53 @@
 					<h1>Pros and Cons of different API types</h1>
 				</section>
 
-				<section><!-- Server-side analytical functions -->
-					<section>
-						<h2>Aggregations / Analytical processing in the datastore</h2>
-					</section>
-					<section>
-						<p>Different datastores offer different levels of server-side analytical processing.</p>
-						<p>Because the functionality is implemented server-side this is not about Client APIs in sense, but there is correlation to the categories.</p>
-					</section>
-					<section>
-						<ul>
-							<li>Key-value and Object stores have none.</li>
-							<li>Relational databases offer the most as a general rule, but there are some toy-sized relational databases that don't have much.</li>
-							<li>Document databases offer a lot to a medium amount depending on which.</li>
-							<li>Timeseries databases have a lot, for their scope.</li>
-							<li>Graph databases have a medium amount.</li>
-						</ul>
-					</section>
+				<section><!-- Schema freedom -->
+					<h2>Schema freedom</h2>
+				</section>
+				<section>
+					<p>Some datastores restrict the schema, some don't.</p>
+					<p>Unknown field &RightArrow; Reject &RightArrow; client runtime error</p>
+					<p>vs.</p>
+					<p>Unknown field &RightArrow; Accept&semi;<br>Surprise new field for other clients</p>
+					<aside class="notes">
+						If applications insert a record that has an unknown field or is missing a field that is mandatory the entire request will be rejected and exception sent back to the client application.
+						Relational databases are well-known for popularizing schema control.
+					</aside>
+				</section>
+				<section>
+					<h4>Positives of server-side locked schema</h4>
+					<ul>
+						<li>Guarantees that all applications connecting to the same backend datastore obey a single schema orthodoxy</li>
+					</ul>
+				</section>
+				<section>
+					<h4>Negatives of server-side locked schema</h4>
+					<p>Schema changes time-consuming</p>
+					<ul>
+						<li>Some downtime usually required</li>
+						<li>App devs and DBA teams need to work in sync.<br>
+							(Typically adds many weeks to releases)</li>
+					</ul>
+				</section>
+				<section>
+					<h4>Schema-enforcing datastores</h4>
+					<ul>
+						<li>Relational databases</li>
+						<li>Graph</li>
+						<li class="na_ish">Timeseries</li>
+					</ul>
+				</section>
+				<section>
+					<h4>Schema-free datastores</h4>
+					<p>(as commonly used, at least)</p>
+					<ul>
+						<li>Document databases</li>
+						<li class="na_ish">Object stores</li>
+						<li class="na_ish">Key-value</li>
+						<li class="na_ish">Block / file</li>
+					</ul>
 				</section>
 
-				<section><!-- Schema free -->
-					<section>
-						<h2>Schema control freedom</h2>
-					</section>
-					<section>
-						<p>Some datastores restrict the schema. The tables and the field names and types of records/objects in them.</p>
-						<p>If applications insert a record that has an unknown field or is missing a field that is mandatory the entire request will be rejected and exception sent back to the client application.</p>
-						<p>Relational databases are well-known for popularizing this feature.</p>
-						<p>N/A for datastores that do not distinguish fields within records/objects. Eg. Object stores, key-value stores.</p>
-					</section>
-					<section>
-						<p>Positives of server-side locked schema:</p>
-						<ul>
-							<li>Guarantees that all applications connecting to the same backend datastore obey a single schema orthodoxy.</li>
-						</ul>
-					</section>
-					<section>
-						<p>Negatives of server-side locked schema:</p>
-						<ul>
-							<li>Updates to the schema require two teams, DBA and app developers, to work in sync to change and release schema changes. (Typically adds a month, not just a week or days, to releases.)</li>
-							<li>Schema changes normally require synchronized downtime for both the datastore and the applications.</li>
-						</ul>
-					</section>
-					<section>
-						<p>Datastore-enforced schema<br>
-							Error sent to application on violation</p>
-						<ul>
-							<li>Relational (SQL)</li>
-							<li>Graph</li>
-							<li class="na_ish">Timeseries</li>
-						</ul>
-						<p>The general rule is shown, but exceptions exist in both sides. Eg. Some document databases have a command to add a schema validation check on a collection.</p>
-					</section>
-					<section>
-						<p>Free schema (aside from mandatory PK)<br>
-							Application freely modifies schema</p>
-						<ul>
-							<li>Document databases</li>
-							<li class="na_ish">Object stores</li>
-							<li class="na_ish">Key-value</li>
-						</ul>
-						<p>The general rule is shown, but exceptions exist in both sides. Eg. Some document databases have a command to add a schema validation check on a collection.</p>
-					</section>
-					<section>
-						<p>The opposite to the datastore backend enforced single schema is the "flexible schema" paradigm most 'NoSQL' databases offered.</p>
-						<p>It also applies to object stores and key-value servers, in a sense. The server observes no fields inside the value, hence no schema control.</p>
-					</section>
 				</section>
 
 				<section><!-- Complex query language -->
