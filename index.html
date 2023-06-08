@@ -418,95 +418,103 @@
 				</section>
 
 				<section><!-- Complex query language -->
-					<h2>Query Language vs library-like API</h2>
-					<ul>
-						<li>....</li>
-					</ul>
+					<h2>Complexity level of API</h2>
+				</section>
+				<section>
+					<h3>Simple functionality in datastore</h3>
+					<p>Example: Classic, spartan key-value store</p>
+					<p>Only four commands &ndash; PUT, GET, DELETE and LIST</p>
+					<p>Keys and values are binary, need deserialization in the app</p>
+					<p>Application developer obliged to code everything beyond single-record processing</p>
+				</section>
+				<section>
+					<h3>Complex functionality in datastore</h3>
+					<p>Example: RDBMS with fully-evolved SQL syntax suport. Stored Procedures. Secondary indexes. Query plan optimizations</p>
 				</section>
 
 				<section><!-- Connections -->
-					<h1>Connections</h1>
+					<h2>Connections</h2>
 				</section>
 
 				<section>
-					<section>
-						<h2>Connection behaviour</h2>
-						<p>The behaviour of an APIs client-server connections is an important feature.</p>
-					</section>
-					<section>
-						<p>Connection behaviour is a different dimension to the code:</p>
-						<ul>
-							<li>You don't program it</li>
-							<li>The client API either supports some connection mode or it doesn't.</li>
-							<li>Using different modes is more often a matter of config files rather than code lines.</li>
-						</ul>
-					</section>
-					<section>
-						<p>Reading above the app developer might feel 'I'm powerless here; I'll skip thinking about it for now.'</p>
-						<p>Don't do that!</p>
-						<p>Be aware of what you get with different client APIs - what they support significantly changes the way the application is managed in live operation / meets business requirements.</p>
-					</section>
+					<h3>Connection behaviour</h3>
+					<p>The behaviour of an APIs client-server connections is an important feature.</p>
+				</section>
+				<section>
+					<p>Connection behaviour is a different dimension to the code:</p>
+					<ul>
+						<li>You don't program it</li>
+						<li>The client API either supports some connection mode or it doesn't.</li>
+						<li>Using different modes is more often a matter of config files rather than code lines.</li>
+					</ul>
+				</section>
+				<section>
+					<p>Reading the previous slide the app developer might feel <i>"I'm powerless here; I'll skip thinking about it for now."</i></p>
+					<p>Don't do that!</p>
+				</section>
+				<section>
+					<p>Be aware of what you get with different client APIs - what they support significantly changes the way the application is managed in live operation / meets business requirements.</p>
 				</section>
 
 				<section>
-					<section>
-						<h2>Connection Protocols</h2>
-						<p>The type of network protocol a database / datastore client API uses affects</p>
-						<ul>
-							<li>Performance</li>
-							<li>Failure response</li>
-						</ul>
-					</section>
-					<section>
-						<p>Connections that stay open provide the best latency. No need to reestablish TCP connection or authentication context for each request sent.</p>
-					</section>
-					<section>
-						<p>Client APIs that have automatic failover (eg. old primary lost, finds new primary automatically) provide a large benefit for business continuity goals. Options to auto-retry interrupted requests save the app developer from writing a lot of error handling.</p>
-					</section>
-					<section>
-						<ul>
-							<li>Custom wire protocol over TCP</li>
-							<li>HTTP1.x</li>
-							<li>HTTP2 Streaming</li>
-							<ul>
-								<li>GRPC</li>
-							</ul>
-						</ul>
-					</section>
-					<section>
-						<p>Databases that have replication (primary+secondaries, or 'multi-master', or master+slave, main+standby, etc) often support rolling restart procedures. <b>This is a very important cost-of-operations advantage.</b></p>
-						<p>If the client API seamlessly switches to new primary as the role changes during maintenance restarts you gain a huge operational advantage: DBAs can do maintenance such as upscaling to new servers, upgrading versions etc. without shutting down the frontend application. I.e. without stopping the business or dragging the app dev team into the task.</p>
-					</section>
-					<section>
-						<h2>Connection Security</h2>
-						<ul>
-							<li>Network encryption</li>
-							<li>Authentication</li>
-							<ul>
-								<li>Classic account name + password</li>
-								<li>Certificate</li>
-								<li>Federated Authentication</li>
-							</ul>
-						</ul>
-					</section>
+					<h3>Connection Protocols</h3>
+					<p>The type of network protocol a database / datastore client API uses affects</p>
+					<ul>
+						<li>Performance</li>
+						<li>Failure response</li>
+					</ul>
 				</section>
+				<section>
+					<p>Connections that stay open provide the best latency. No need to reestablish TCP connection or authentication context for each request sent. Multiple-operation transactions can be performed because the client connection has enough state.</p>
+				</section>
+				<section>
+					<p>Requests that use a new connection each time can be run without holding a TCP socket open indefinitely while the app runs. Less state allows broader network scenarios, eg. SaaS backends behind load balancers.</p>
+				</section>
+				<section>
+					<p>Client APIs that have automatic failover (eg. old primary lost, finds new primary automatically) provide a large benefit for business continuity goals. Options to auto-retry interrupted requests save the app developer from writing a lot of error handling.</p>
+				</section>
+				<section>
+					<ul>
+						<li>Custom wire protocol over TCP</li>
+						<li>HTTP1.x</li>
+						<li>HTTP2 Streaming</li>
+						<ul>
+							<li>GRPC</li>
+						</ul>
+					</ul>
+				</section>
+				<section>
+					<p>Databases that have replication (primary+secondaries, or 'multi-master', or master+slave, main+standby, etc) often support rolling restart procedures. <b>This is a very important cost-of-operations advantage.</b></p>
+					<p>If the client API seamlessly switches to new primary as the role changes during maintenance restarts you gain a huge operational advantage: DBAs can do maintenance such as upscaling to new servers, upgrading versions etc. without shutting down the frontend application. I.e. without stopping the business or dragging the app dev team into the task.</p>
+				</section>
+				<section>
+					<h2>Connection Security</h2>
+					<ul>
+						<li>Network encryption</li>
+						<li>Authentication</li>
+						<ul>
+							<li>Classic account name + password</li>
+							<li>Certificate</li>
+							<li>Federated Authentication</li>
+						</ul>
+					</ul>
+				</section>
+
 
 				<section><!-- Client-side encryption -->
-					<section>
-						<h1>Client-side encryption</h1>
-					</section>
-					<section>
-						<p>To protect against information theft an application can store already-encrypted data in the database / datastore. Hacking the database server, or its backups, becomes pointless.</p>
-						<p>Something to consider for applications that have security requirements so high they can't even trust the DBA team / DBAAS provider.</p>
-						<p>Storing encrypted data makes the database 'dumber' though. Eg. querying a record set by range X1 to X2 cannot use efficient index lookup if "X" is an encrypted value</p>
-					</section>
-					<section>
-						<p>A few database APIs have added the crypto functions to the database API itself. This is an alternative to using a general-purpose crypto library to manually do the encryption and decryption steps.</p>
-						<p>The API cannot auto-magic the work away though. The tech debt rises just as much as if you do manual encryption. The main burden is the key management, i.e. the IT security team needs to manage the certs and distribute new and periodically renewed certs to the application servers, and the application team have to work with them when they do that.</p>
-					</section>
+					<h1>Client-side encryption</h1>
+				</section>
+				<section>
+					<p>To protect against information theft an application can store already-encrypted data in the database / datastore. Hacking the database server, or its backups, becomes pointless.</p>
+					<p>Something to consider for applications that have security requirements so high they can't even trust the DBA team / DBAAS provider.</p>
+					<p>Storing encrypted data makes the database 'dumber' though. Eg. querying a record set by range X1 to X2 cannot use efficient index lookup if "X" is an encrypted value</p>
+				</section>
+				<section>
+					<p>A few database APIs have added the crypto functions to the database API itself. This is an alternative to using a general-purpose crypto library to manually do the encryption and decryption steps.</p>
+					<p>The API cannot auto-magic the work away though. The tech debt rises just as much as if you do manual encryption. The main burden is the key management, i.e. the IT security team needs to manage the certs and distribute new and periodically renewed certs to the application servers, and the application team have to work with them when they do that.</p>
 				</section>
 
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)">
+				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)"><!-- Summary -->
 					<h1>Summary</h1>
 				</section>
 
@@ -517,6 +525,10 @@
 				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
 					<p>Datastore APIs ...</p>
 					<p>differ more than you realize.</p>
+				</section>
+
+				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
+					<p>Datastore API choice exists!</p>
 				</section>
 
 				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
@@ -552,12 +564,8 @@
 				</section>
 
 				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
-					<p>Datastore API choice does NOT exist</p>
-				</section>
-
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
-					<p>Datastore API choice does NOT exist</p>
-					<p>... once the backend Datastore is decided.</p>
+					<p>Datastore API choice does NOT exist after</p>
+					<p>the backend datastore has been chosen.</p>
 				</section>
 
 				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
