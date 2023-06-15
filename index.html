@@ -876,18 +876,56 @@
 					</ul>
 				</section>
 
-				<section>
-					<h2>&hellip; plus the 'Mashups'</h2>
+				<section><!-- Mashups title -->
+					<h2>&hellip; plus the<br>'Mashups'</h2>
 				</section>
 				<section>
 					<h2>Multi-model</h2>
-					<p>Mixtures of the previous types served by the same datastore and competing client APIs.</p>
-					<p>Eg. App A needs to use SQL but App B is easier to program if records handled as JSON objects.</p>
+					<p>Data model in datastore a mixture of main types.</p>
+					<div>The application programmer's experience:</div>
+					<ul>
+						<li>Awkward, extra stuff added to original API<br>
+							&nbsp;or</li>
+						<li>Two competing APIs</li>
+					</ul>
 				</section>
 				<section>
-					<h2>A lot of "A little bit of this in that"</h2>
-					<p>Without identifying as a multi-model many datastores have glued-on, often awkward extra APIs for interfaces of another family. Examples: JSON field type in a relational db; SQL-like table join function in an object db; Graph queries; pub/sub or streaming APIs; etc.​</p>
-					<p>Some of the out-of-family, extra API additions are not so awkward. Example: Basic text search index as an extra index type for tables/collections with string fields.</p>
+					<p>"A little bit of this in that"</p>
+					<p>Eg. JSON-ish object data type in relational table field</p>
+					<p>Good for: Old app A is relational, but document style will suit new app B</p>
+					<!-- p>Eg. Graph extension in relational or document databases</p -->
+				</section>
+				<section>
+					<div>Eg. JSON_OBJECT in a MySQL table</div>
+					<pre><code data-trim>
+						INSERT INTO e_store.products (
+							name, brand_id, category_id, 
+							attributes
+						) VALUES (
+							"Desire", 2, 14, 
+							JSON_OBJECT(
+								"sim", "Micro-SIM",
+								"network", JSON_ARRAY(
+									"GSM" , "CDMA" , "HSPA" , "EVDO"
+									) ,
+								"dim_desc", "5.11 x 2.59 x 0.46 inches" ,
+								"weight_kg", 0.143,
+								..."
+							)
+						);
+					</code></pre>
+					<aside class="notes">
+						JSON_OBJECT (not JSON) type of MySQL shown. https://www.digitalocean.com/community/tutorials/working-with-json-in-mysql
+					</aside>
+				</section>
+				<section>
+					<p>API change barely noticeable with some multi-model additions. Eg:</p>
+					<ul>
+						<li>Geo-spatial datatype for database field</li>
+						<li>Text search in database tables<br>
+							(simple tokenization of string; tokens &rightarrow; record)</li>
+					</ul>
+					<p>API additions were idiomatic with original API</p>
 				</section>
 				<section>
 					<h2>Competing APIs for same datastore</h2>
