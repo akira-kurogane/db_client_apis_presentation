@@ -537,36 +537,156 @@
 						<li>Otherwise (de)serilization and schema changes serious responsibility</li>
 					</ul>
 				</section>
-				<section>
-					<div>FYI Many database storage engines wrap a key-value store.</div>
-					<div>Eg. MongoDB wraps WiredTiger. MongoDB engine layer deserializes binary to BSON record format, etc.</div>
-					<div>Eg. RocksDB embedded storage engine is built around a LevelDB-forked core.</div>
-				</section>
+				<!-- section>
+					<div>FYI Many database storage engines wrap a key-value store</div>
+					<div>Eg. MongoDB wraps WiredTiger</div>
+					<div>Eg. RocksDB built around a LevelDB-forked core</div>
+				</section -->
 
 				<section><!-- Timeseries db -->
 					<h1>Timeseries database</h1>
-				</section>				
+				</section>	
 				<section>
-					<section>
-						<pre><code>
-							//Data is typically inserted by other continuously-running services ①​
-							import xyz_tsdb_lib
-							tsdb_conn = tsdb.open(host_url) ②​
-							ts_span = [ Date("2023-03-24T08:55:00Z"), Date("2023-03-24T09:00:00Z") ] ③​
-							resolution = "10s" ③​
-							qry = 'rate(metric_abc{host="foo"})' ④​
-							ts_qry_result = tsdb_conn.query(ts_span, resolution, qry) ③​
-							print(ts_qry_result) ⑤​
-							> [ [1679648100, 4562], [1679648110, 1040], [1679648120, 3890],  … , [1679648390, 8261], [1679648400, 7342] ]
-						</code></pre>
-						<aside class="notes">
-							1. As mentioned in the comment. Because monitoring seems to be the most common
-							2. There are both HTTP and custom or ODBC db drive type connections. The HTTP ones don't seem require auth by default. At least the ones typically used for monitoring.
-							3. A time range to query on and the resolution (interval) to return the timeseries samples is always required.
-							4. There is query syntax. Aggregations on counter or gauge timeseries values. Often much more complex than this example.
-							5. The result is an array of &lt;timestamp&gt;, &lt;value&gt; pairs. The timestamp is forced to be round steps by resolution argument and the values likewise - either latest-before value, nearest value, extrapolated value between two nearest samples, etc.
-						</aside>
-					</section>
+					<pre><code data-trim data-line-numbers="2-3|5-13|1-15">
+						# write to timeseries db
+						import xyz_tsdb_lib
+						tsdb_conn = tsdb.open(host_url)
+			
+						metric_sample = [
+							{"name": "page_requests", "labels": [ "abc": ..., ...],
+							 "timestamps": [t₁, t₂, t₃, ...], 
+							 "values":     [x₁, x₂, x₃, ...]},
+							{"name": "page_requests", "labels": [ "abc": ..., ...],
+							 "timestamps": [t₁, t₂, t₃, ...], 
+							 "values":     [y₁, y₂, y₃, ...]},
+							...
+						]​
+
+						ts_write_ok = tsdb_conn.put(metric_sample)
+					</code></pre>
+					<aside class="notes">
+						The write side is simple.
+						Can also be single time sample instead of span.
+						1. Data is typically inserted by other continuously-running services. Because monitoring seems to be the most common
+						2. There are both HTTP and custom or ODBC db drive type connections. The HTTP ones don't seem require auth by default. At least the ones typically used for monitoring.
+						3. A time range to query on and the resolution (interval) to return the timeseries samples is always required.
+						QuestDB example of insert with the ILP (InfluxDb line protocol) API is pretty similar: https://questdb.io/docs/develop/insert-data/
+					</aside>
+				</section>
+				<section>
+					<div>The timeseries key datatype is a series of {timestamp, numeric value} pairs</div>
+					<div>Series has a name and type (gauge or counter), and extra fields (labels) for filtering / grouping later</div>
+				</section>
+				<!-- section>
+					<h4>Gauge-type timeseries</h4>
+					<div>Examples</div>
+					<ul>
+						<li>Number of open connections</li>
+						<li>Current mem usage</li>
+						<li>Current temperature</li>
+						<li>Market price of stock XYZ</li>
+					</ul>
+					<div>The absolute value is meaningful</div>
+				</section>
+				<section>
+					<h4>Counter-type timeseries</h4>
+					<div>Examples</div>
+					<ul>
+						<li>Bytes transmitted</li>
+						<li>Page views</li>
+						<li>Total dollar receipts for foo-type products</li>
+						<li>Total number of foo-type products sold</li>
+					</ul>
+					<div>The rate of change is meaningful</div>
+				</section>
+				<section>
+					<h4>Histogram timeseries</h4>
+					<div>Example: Bytes transmitted where size of response</div>
+					<ul>
+						<li>&lt;= 1kb</li>
+						<li>&gt; 1kb, &lt;= 4kb</li>
+						<li>&gt; 4kb, &lt;= 16kb</li>
+						<li>etc.</li>
+					</ul>
+					<div>Basically auto-bucketed counter timeseries</div>
+				</section -->
+				<section>
+					<pre><code data-trim data-line-numbers="2-3|5|7|8|10-17|1-17">
+						# read plain timeseries
+						import xyz_tsdb_lib
+						tsdb_conn = tsdb.open(host_url)
+
+						ts_span = [ Date("2023-03-24T08:55:00Z"), Date("2023-03-24T09:00:00Z") ]
+						
+						qry = '{name="page_requests",host="foo"}'
+						 # or 'page_requests{host="foo"}' in a common convention
+						ts_qry_result = tsdb_conn.query(ts_span, qry)
+
+						print(ts_qry_result)
+						> [ { name: "page_requests", labels: [ path: "/abc", host: "foo", ... ],
+						      vals: [1679648096, 525262], [1679648111, 525745], ... ] }, 
+								{ name: "page_requests", labels: [ path: "/def", host: "bar", ... ],
+									vals: [1679648100,  24234], [1679648115,  24270], ... ] },
+								{ name: "page_requests", labels: [ path: "/def", host: "foo", ... ],
+								  vals: [1679648100,  24234], [1679648115,  24270], ... ] },
+						  ]
+					</code></pre>
+					<aside class="notes">
+						1. Data is typically inserted by other continuously-running services. Because monitoring seems to be the most common
+						2. There are both HTTP and custom or ODBC db drive type connections. The HTTP ones don't seem require auth by default. At least the ones typically used for monitoring.
+						3. A time range to query on and the resolution (interval) to return the timeseries samples is always required.
+						4. There is query syntax. Aggregations on counter or gauge timeseries values. Often much more complex than this example.
+						5. The result is an array of &lt;timestamp&gt;, &lt;value&gt; pairs. The timestamp is forced to be round steps by resolution argument and the values likewise - either latest-before value, nearest value, extrapolated value between two nearest samples, etc.
+					</aside>
+				</section>
+				<section>
+					<ul>
+						<li>Simple read returns the original timestamp + value pairs</li>
+						<li>Too many points of data for human reading</li>
+						<li>Pass through to analytical algorithms etc.</li>
+					</ul>
+				</section>
+				<section>
+					<pre><code data-trim data-line-numbers="2-3|5-6|7|8|10-15|1-15">
+						# aggregation query of timeseries db
+						import xyz_tsdb_lib
+						tsdb_conn = tsdb.open(host_url)
+
+						ts_span = [ Date("2023-03-24T08:55:00Z"), Date("2023-03-24T09:00:00Z") ]
+						resolution = "10s"
+						qry = 'sum(rate(page_requests{host="foo"})) by (path)'
+						ts_qry_result = tsdb_conn.query(ts_span, qry, resolution)
+
+						print(ts_qry_result)
+						> [ { metric: "page_requests", labels: [ path: "/abc" ],
+						      vals: [1679648100, 4562], [1679648110, 1040], ... ] }, 
+								{ metric: "page_requests", labels: [ path: "/def" ],
+								  vals: [1679648100,   24], [1679648110,   56], ... ] },
+						  ]
+					</code></pre>
+					<aside class="notes">
+						1. Data is typically inserted by other continuously-running services. Because monitoring seems to be the most common
+						2. There are both HTTP and custom or ODBC db drive type connections. The HTTP ones don't seem require auth by default. At least the ones typically used for monitoring.
+						3. A time range to query on and the resolution (interval) to return the timeseries samples is always required.
+						4. There is query syntax. Aggregations on counter or gauge timeseries values. Often much more complex than this example.
+						5. The result is an array of &lt;timestamp&gt;, &lt;value&gt; pairs. The timestamp is forced to be round steps by resolution argument and the values likewise - either latest-before value, nearest value, extrapolated value between two nearest samples, etc.
+					</aside>
+				</section>
+				<section>
+					<ul>
+						<li>Automatic selection of samples at requested time span and resolution.</li>
+						<li>Aggregate functions &ndash; rate(), sum(), avg(), etc.</li>
+						<li>Algebra syntax (+, -, /, *) allows adding two metrics, dividing one by another, group, etc.</li>
+					</ul>
+				</section>
+				<section>
+					<ul>
+						<li>Timeseries are usually real-world measurements</li>
+						<li>Complex aggregation formulae, but real-world intuition helps</li>
+						<li>Most common use: visualization
+							<svg style="stroke: #3d85de; fill: rgba(61, 133, 222, 0.3)" class="sparkline sparkline--blue sparkline--filled" width="100" height="30" stroke-width="3"><path class="sparkline--fill" d="M4 18.03 L 4 18.03 L 8.842105263157894 15.94 L 13.68421052631579 6.45 L 18.526315789473685 5 L 23.36842105263158 23.72 L 28.210526315789473 9.13 L 33.05263157894737 17 L 37.89473684210526 18.92 L 42.73684210526316 21.09 L 47.578947368421055 23.57 L 52.421052631578945 20.63 L 57.26315789473684 17.59 L 62.10526315789474 14.87 L 66.94736842105263 8.1 L 71.78947368421052 5.24 L 76.63157894736842 23.55 L 81.47368421052632 8.76 L 86.3157894736842 19.92 L 91.15789473684211 17.7 L 96 14.87 V 30 L 4 30 Z" stroke="none"></path><path class="sparkline--line" d="M4 18.03 L 4 18.03 L 8.842105263157894 15.94 L 13.68421052631579 6.45 L 18.526315789473685 5 L 23.36842105263158 23.72 L 28.210526315789473 9.13 L 33.05263157894737 17 L 37.89473684210526 18.92 L 42.73684210526316 21.09 L 47.578947368421055 23.57 L 52.421052631578945 20.63 L 57.26315789473684 17.59 L 62.10526315789474 14.87 L 66.94736842105263 8.1 L 71.78947368421052 5.24 L 76.63157894736842 23.55 L 81.47368421052632 8.76 L 86.3157894736842 19.92 L 91.15789473684211 17.7 L 96 14.87" fill="none"></path></svg>
+						  or machine learning</li>
+					</ul>
 				</section>
 
 				<section><!-- Graph dbs -->
@@ -576,42 +696,184 @@
 					<section>
 						<pre><code>
 							// Connection etc. The same as SQL or a document db API
-							// DBA prior task: "CREATE NODE_TYPE Person (...); CREATE NODE_TYPE Team (…); CREATE EDGE_TYPE TeamMembership (…); CREATE GRAPH OrgChart (Person, TeamMembership, Team)" ①
+							
 							p1 = [10320, "smith", "john"]
-							db.execute("INSERT Person (%s, %s, %s)", new_p) ②​
+							db.execute("INSERT People (?)", new_p) 
 							t1 = ["ACME", "UK", "Risk"]
-							db.execute("INSERT TeamMembership(%s, %s, %s)", p1.id, t1)) ③​
+							db.execute("INSERT TeamMembership(?, ?)", p1, t1))
+
 							person_cur = db.execute('SELECT Person-[TeamMembership]->Team(%s)', t1); ④​
 							print(person_cur.fetchone())
 							> (10414, "kelly", "jane")
 						</code></pre>
 						<aside class="notes">
-							1. ???
-							2. ????
-							3. ???
-							4. ???
+							<pre>
+								KuzuDB:
+									MATCH (a:User)-[e:Follows]->(b:User)
+									RETURN a.name, e, b.name;
+								Tigergraph:
+									SELECT p
+									FROM users:u-(Posted>)-:p
+									WHERE u.id == uid;
+							</pre>
 						</aside>
 					</section>
+				</section>
+				<section>
+					<div>Query and update syntax has expressions for edge and nodes (vertices)</div>
+					<div>Otherwise just like other database APIs</div>
+					<div>Most Graph DBs have SQL-ish query language.<br>
+						A few have a Document API.</div>
+					<aside class="notes">
+						KuzuDB are some examples of SQL-ish. https://kuzudb.com/docs/cypher/query-clauses/match.html
+						ArrangoDB is mostly document db, but has parsed-QL-string API like SQL.
+						TigerGraph is very document-like via the HTTP API. But also has "GSQL"
+						TerminusDB has the document db API. https://terminusdb.com/docs/guides/reference-guides/document-interface .
+					</aside>
 				</section>
 
 				<section><!-- Embedded Storage Engine -->
 					<h1>Embedded Storage Engine</h1>
 				</section>
 				<section>
-					<p>If the application ...</p>
+					<p>If:</p>
 					<ul>
-						<li>Doesn't share data with other instances</li>
-						<li>Doesn't require durability guarantees above that of the local filesystem</li>
-						<li>A minimal query engine functionality is acceptable</li>
+						<li>Multi-threaded app, low-latency goals</li>
+						<li>App doesn't share data with other app instances</li>
+						<li>Local filesystem durability is enough</li>
+						<li>Very low-frills query engine is OK</li>
 					</ul>
-					<p>... it could use a storage engine, embedded in itself, instead of connecting to an external datastore</p>
+					<p>Application can use an embedded storage engine</p>
 				</section>
 				<section>
-					<section>
-						<pre><code>
-							.... TODO ....
-						</code></pre>
-					</section>
+					<div>"Can't I just save app data to disk myself?"</div>
+				</section>
+				<section>
+					<ul>
+						<li>Multi-thread contention for same records</li>
+						<li>Fast, guaranteed ACID consistency</li>
+						<li>Best disk &RightArrowLeftArrow; memory algorithms for RAM cache</li>
+						<li>Convenient management of secondary indexes</li>
+						<li>Backup-copy function</li>
+						<li>etc.</li>
+					</ul>
+				</section>
+				<section>
+					<div>'Lite' database example</div>
+					<pre><code data-trim>
+						#include &lt;stdio.h&gt;
+						#include &lt;sqlite3.h&gt;
+						
+						static int fooIterateCb(void *NotUsed, int argc, char **argv, char **azColName){
+						  int i;
+						  for(i=0; i&lt;argc; i++){
+						    printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+							}
+						  printf("\n");
+						  return 0;
+						}
+						
+						int main(int argc, char **argv){
+						  sqlite3 *db;
+							char *zErrMsg = 0;
+						  int rc;
+						
+						  if( argc!=3 ){
+						    fprintf(stderr, "Usage: %s DATABASE SQL-STATEMENT\n", argv[0]);
+						    return(1);
+						  }
+						  rc = sqlite3_open("testdb", &db);
+						  if( rc ){
+						    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+						     sqlite3_close(db);
+						    return(1);
+						  }
+						  rc = sqlite3_exec(db, "SELECT * FROM foo", fooIterateCb, 0, &zErrMsg);
+						  if( rc!=SQLITE_OK ){
+						    fprintf(stderr, "SQL error: %s\n", zErrMsg);
+						    sqlite3_free(zErrMsg);
+						  }
+						  sqlite3_close(db);
+						  return 0;
+						}
+					</code></pre>
+					<aside class="notes">
+						Sample above from dfrom https://zetcode.com/db/sqlitec/
+					</aside>
+				</section>
+				<section>
+					<di>Key-value storage engine example</di>
+					<pre><code data-trim>
+						#include &lt;sys/types.h&gt;
+						#include &lt;stdio.h&gt;
+						#include &lt;stdlib.h&gt;
+						#include &lt;string.h&gt;
+						
+						#include &lt;db.h&gt;
+						
+						#define	DATABASE	"access.db"
+						int main __P((int, char *[]));
+						int usage __P((void));
+						
+						int
+						main(argc, argv)
+							int argc;
+							char *argv[];
+						{
+							extern int optind;
+							DB *dbp;
+							DBC *dbcp;
+							DBT key, data;
+							size_t len;
+							int ch, ret, rflag;
+							char *database, *p, *t, buf[1024], rbuf[1024];
+							const char *progname = "ex_access";		/* Program name. */
+							...
+						}
+
+						...
+						/* Optionally discard the database. */
+						if (rflag)
+							(void)remove(database);
+						
+						/* Create and initialize database object, open the database. */
+						if ((ret = db_create(&dbp, NULL, 0)) != 0) {
+							fprintf(stderr,
+									"%s: db_create: %s\n", progname, db_strerror(ret));
+							return (EXIT_FAILURE);
+						}
+						dbp->set_errfile(dbp, stderr);
+						dbp->set_errpfx(dbp, progname);
+						if ((ret = dbp->set_pagesize(dbp, 1024)) != 0) {
+							dbp->err(dbp, ret, "set_pagesize");
+							goto err1;
+						}
+						if ((ret = dbp->set_cachesize(dbp, 0, 32 * 1024, 0)) != 0) {
+							dbp->err(dbp, ret, "set_cachesize");
+							goto err1;
+						}
+						if ((ret = dbp->open(dbp,
+								NULL, database, NULL, DB_BTREE, DB_CREATE, 0664)) != 0) {
+							dbp->err(dbp, ret, "%s: open", database);
+							goto err1;
+						}
+
+						...
+						...
+					</code></pre>
+					<aside class="notes">
+						Sample above from https://www.sqlite.org/quickstart.html. Others also at https://github.com/berkeleydb/libdb/blob/master/examples/c/ex_access.c
+					</aside>
+				</section>
+				<section>
+					<ul>
+						<li>Latency and throughput very high</li>
+						<li>API will probably be C</li>
+						<li>Database engine objects inside app process</li>
+						<li>Database service threads inside app process</li>
+						<li>Database-internal issues will be app issues</li>
+						<li>App crash = unclean db shutdown</li>
+					</ul>
 				</section>
 
 				<section>
