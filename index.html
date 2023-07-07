@@ -27,11 +27,21 @@
 		<div class="reveal">
 			<div class="slides">
 
-				<section>
+				<section data-state="title-1">
 					<h1>Datastore<br>
 						Client APIs</h1>
 					<p>The app dev's datastore <br>
 						🛒 shopping guide</p>
+				</section>
+
+				<section>
+							<p>Akira Kurogane</p>
+							<p style="font-size: 75%;">Distributed Data Specialist @ Marionete</p>
+							<ul>
+								<li>MongoDB expert / Software industry</li>
+								<li>Distributed Search Engine developer / eCommerce</li>
+								<li>Application development / Finance industry</li>
+							</ul>
 				</section>
 
 				<section><!-- Overview -->
@@ -87,7 +97,7 @@
 				<section data-auto-animate><!-- Gruen Effect -->
 					<h2>The Gruen Effect</h2>
 					<h4 data-auto-animate-id="gest">...</h4>
-					<p data-auto-animate-id="geq">Consumers enter a shopping mall or store and, surrounded by an intentionally confusing layout, lose track of their original intentions, making them more susceptible to making impulse buys</p>
+					<p data-auto-animate-id="geq">Consumers enter a shopping mall or store and, surrounded by an intentionally confusing layout, lose track of their original intentions, making them more susceptible to impulse buys</p>
 				</section>
 
 				<section data-auto-animate><!-- Gruen Effect -->
@@ -124,7 +134,7 @@
 				</section>
 
 				<section><!-- Styles of Datastore APIs -->
-					<h1>Grouping APIs by 'Look and feel'</h1>
+					<h1 style="">Grouping APIs by<br/>'Look and feel'</h1>
 				</section>
 
 				<section>
@@ -162,7 +172,7 @@
 
 						cur.execute("SELECT fooId, catId, data FROM test")
 						print(cur.fetchone())
-						// (1, 14, "abcdef")
+						# (1, 14, "abcdef")
 					</code></pre>
 					<aside class="notes">
 						1.  GRANT CREATE TABLE … is usually only given to an account the DBA manually logs in with. The table object needs to be created first, and the expectations of the app must be in sync with what the table definition was made to be by the DBA.
@@ -174,14 +184,14 @@
 					</aside>
 				</section>
 				<section>
-					<pre><code data-trim data-line-numbers="1|2-5|7-13|1-13">
-						// CREATE TABLE foo ...
+					<pre><code data-trim data-line-numbers="2-6|7|9-15|1-15">
+						-- CREATE TABLE foo ...
 						CREATE TABLE IF NOT EXISTS categories (
 							INT catId NOT NULL,
 							VARCHAR(48) catName NOT NULL,
 							PRIMARY KEY (catId)
 						);
-						// INSERT INTO categories VALUES (..., '...'), (..., '...''), ...;
+						-- INSERT INTO categories VALUES (..., '...'), (..., '...''), ...;
 
 						CREATE TABLE IF NOT EXISTS foo (
 							fooId INT NOT NULL AUTO_INCREMENT,
@@ -245,10 +255,18 @@
 					</code></pre>
 				</section>
 				<section>
-					<div>Skipping: Stored procedures</div>
-					<div>Skipping: BEGIN / COMMIT / ABORT transaction</div>
-					<div>Skipping: parent and child row inserts</div>
-					<div>Skipping: Large Aggregation example</div>
+					<h3>Other common tasks to wrap:</h3>
+					<ul>
+						<li>BEGIN / COMMIT / ABORT transaction</li>
+						<li>Parent and child row inserts</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Move logic to the DBMS?</h3>
+					<h4>Stored procedures</h4>
+					<p>Written in a limited, non-portable DSL.<br/>Slow despite being in database.</p>
+					<h4>Aggregations</h4>
+					<p>Typically easy to embed, but ...</p>
 				</section>
 				<section><!-- Postgresql SELECT statement reference -->
 					<pre><code data-trim>
@@ -302,6 +320,7 @@
 					</code></pre>
 				</section>
 				<section>
+					<h3>SQL summary</h3>
 					<ul>
 						<li>SQL syntax a separate language</li>
 						<li>Relational table concept simple, suits many</li>
@@ -320,9 +339,10 @@
 					</aside>
 				</section>
 				<section>
+					<h3>SQL summary</h3>
 					<ul>
 						<li>DB schema change deployments slow</li>
-						<li>App programmer sees the DB as rigid</li>
+						<li><b>App programmer sees the DB as rigid</b></li>
 						<li>Multi-table transactions the norm</li>
 						<!-- li>Generic programming around SQL difficult</li -->
 					</ul>
@@ -357,39 +377,51 @@
 						    child_recs: [ "Xxx", "Yyy", "Zzz" ], created: ... }
 					</code></pre>
 					<aside class="notes">
-						1. Native variable types of the programming language are used as-is (so long as they are a datatype in the db). No translation to another type needed. It's just your object, no transformation to a record type is required. When you fetch it back it will be the same without extra deserialization code needing to be written. However, if your code has a datatype that the db doesn't support that is another matter.
-						2. Typically the db will auto-create table/collections as soon as a write command is executed on them
-						3. Typically any schema object can be inserted. This means the app devs can change the schema without DBA requests.
-						4. Queries are with objects (this case a simple 'fieldX = valueY' rule by way of map with a single key->value pair) of the programming language
-						5. The results come back as a native object. Not a record tuple type which is a little bit more verbose
+						<ul>
+							<li>1. Native variable types of the programming language are used as-is (so long as they are a datatype in the db). No translation to another type needed. It's just your object, no transformation to a record type is required. When you fetch it back it will be the same without extra deserialization code needing to be written. However, if your code has a datatype that the db doesn't support that is another matter.</li>
+							<li>2. Typically the db will auto-create table/collections as soon as a write command is executed on them</li>
+							<li>3. Typically any schema object can be inserted. This means the app devs can change the schema without DBA requests.</li>
+							<li>4. Queries are with objects (this case a simple 'fieldX = valueY' rule by way of map with a single key->value pair) of the programming language</li>
+							<li>5. The results come back as a native object. Not a record tuple type which is a little bit more verbose</li>
+						</ul>
 					</aside>
 				</section>
 				<section>
-					<div>Skipping: transaction example (less used, but available)</div>
-					<div>Skipping: aggregation example</div>
-					<div>Skipping: No stored procs</div>
+					<h3>No shared API standards</h3>
+					<p>Every document database has<br/>an individual API syntax</p>
+					<Cassandra: class="footnote">(A few API-compatible 'clones' or proxy services exist. MongoDB: Amazon DocumentDB, Azure CosmosDB. Cassandra: ScyllaDB)</p>
+				</section>
+				<section>
+					<h3>Transactions not encouraged</h3>
+					<p>Most don't support at all. But if supported,<br/>syntax is idiomatic to app's language.</p>
+					<pre><code data-trim>
+						# one example ...
+						response = client.transact_write_items(
+							TransactItems=[
+									{ ... },
+									{ ... }
+							]
+						)
+					</code></pre>
+				</section>
+				<section>
+					<p>No stored procedures</p>
+					<p>Aggregations supported roughly equal to RDBMS,<br/>but the syntax is different</p>
 				</section>
 				<section>
 					<ul>
 						<li>APIs idiomatic with app language</li>
-						<li>Automatic table creation, incl. default PK</li>
+						<li>But each database's API has a different syntax</li>
 						<li>Free field schema</li>
-						<li>Nested arrays, maps in records normal.<br>(Separate parent and child tables unnecessary)</li>
-
+						<li>Automatic table creation, incl. default PK</li>
 					</ul>
-					<aside class="notes">
-						1. Native variable types of the programming language are used as-is (so long as they are a datatype in the db). No translation to another type needed. It's just your object, no transformation to a record type is required. When you fetch it back it will be the same without extra deserialization code needing to be written. However, if your code has a datatype that the db doesn't support that is another matter.
-						2. Typically the db will auto-create table/collections as soon as a write command is executed on them
-						3. Typically any schema object can be inserted. This means the app devs can change the schema without DBA requests.
-						4. Queries are with objects (this case a simple 'fieldX = valueY' rule by way of map with a single key->value pair) of the programming language
-						5. The results come back as a native object. Not a record tuple type which is a little bit more verbose
-					</aside>
 				</section>
 				<section>
+					<div>(cont.)</div>
 					<ul>
-						<li>Schema constraints, but non-typical</li>
+						<li>Nested arrays, maps in records normal</li>
+						<li>Schema constraints supported, but non-typical</li>
 						<li>Table joins supported, but non-typical</li>
-						<li>Secondary index creation needs explicit requests</li>
 					</ul>
 					<aside class="notes">
 						<ul>
@@ -665,11 +697,13 @@
 						  ]
 					</code></pre>
 					<aside class="notes">
-						1. Data is typically inserted by other continuously-running services. Because monitoring seems to be the most common
-						2. There are both HTTP and custom or ODBC db drive type connections. The HTTP ones don't seem require auth by default. At least the ones typically used for monitoring.
-						3. A time range to query on and the resolution (interval) to return the timeseries samples is always required.
-						4. There is query syntax. Aggregations on counter or gauge timeseries values. Often much more complex than this example.
-						5. The result is an array of &lt;timestamp&gt;, &lt;value&gt; pairs. The timestamp is forced to be round steps by resolution argument and the values likewise - either latest-before value, nearest value, extrapolated value between two nearest samples, etc.
+						<p>
+							1. Data is typically inserted by other continuously-running services. Because monitoring seems to be the most common<br/>
+							2. There are both HTTP and custom or ODBC db drive type connections. The HTTP ones don't seem require auth by default. At least the ones typically used for monitoring.<br/>
+							3. A time range to query on and the resolution (interval) to return the timeseries samples is always required.<br/>
+							4. There is query syntax. Aggregations on counter or gauge timeseries values. Often much more complex than this example.<br/>
+							5. The result is an array of &lt;timestamp&gt;, &lt;value&gt; pairs. The timestamp is forced to be round steps by resolution argument and the values likewise - either latest-before value, nearest value, extrapolated value between two nearest samples, etc.
+						</p>
 					</aside>
 				</section>
 				<section>
@@ -693,42 +727,42 @@
 					<h1>Graph database</h1>
 				</section>
 				<section>
-					<section>
-						<pre><code>
-							// Connection etc. The same as SQL or a document db API
-							
-							p1 = [10320, "smith", "john"]
-							db.execute("INSERT People (?)", new_p) 
-							t1 = ["ACME", "UK", "Risk"]
-							db.execute("INSERT TeamMembership(?, ?)", p1, t1))
+					<pre><code>
+						// Connection etc. The same as SQL or a document db API
+						
+						p1 = [10320, "smith", "john"]
+						db.execute("INSERT People (?)", new_p) 
+						t1 = ["ACME", "UK", "Risk"]
+						db.execute("INSERT TeamMembership(?, ?)", p1, t1))
 
-							person_cur = db.execute('SELECT Person-[TeamMembership]->Team(%s)', t1); ④​
-							print(person_cur.fetchone())
-							> (10414, "kelly", "jane")
-						</code></pre>
-						<aside class="notes">
-							<pre>
-								KuzuDB:
-									MATCH (a:User)-[e:Follows]->(b:User)
-									RETURN a.name, e, b.name;
-								Tigergraph:
-									SELECT p
-									FROM users:u-(Posted>)-:p
-									WHERE u.id == uid;
-							</pre>
-						</aside>
-					</section>
+						person_cur = db.execute('SELECT Person-[TeamMembership]->Team(%s)', t1); ④​
+						print(person_cur.fetchone())
+						> (10414, "kelly", "jane")
+					</code></pre>
+					<aside class="notes">
+						<pre>
+							KuzuDB:
+								MATCH (a:User)-[e:Follows]->(b:User)
+								RETURN a.name, e, b.name;
+							Tigergraph:
+								SELECT p
+								FROM users:u-(Posted>)-:p
+								WHERE u.id == uid;
+						</pre>
+					</aside>
 				</section>
 				<section>
-					<div>Query and update syntax has expressions for edge and nodes (vertices)</div>
-					<div>Otherwise just like other database APIs</div>
-					<div>Most Graph DBs have SQL-ish query language.<br>
-						A few have a Document API.</div>
+					<p>Query and update syntax has expressions for edge and nodes (vertices)</p>
+					<p>Otherwise just like other database APIs</p>
+					<p>Most Graph DBs have SQL-ish query language.<br>
+						A few have a Document API.</p>
 					<aside class="notes">
-						KuzuDB are some examples of SQL-ish. https://kuzudb.com/docs/cypher/query-clauses/match.html
-						ArrangoDB is mostly document db, but has parsed-QL-string API like SQL.
-						TigerGraph is very document-like via the HTTP API. But also has "GSQL"
-						TerminusDB has the document db API. https://terminusdb.com/docs/guides/reference-guides/document-interface .
+						<p>
+							KuzuDB are some examples of SQL-ish. https://kuzudb.com/docs/cypher/query-clauses/match.html<br/>
+							ArrangoDB is mostly document db, but has parsed-QL-string API like SQL.<br/>
+							TigerGraph is very document-like via the HTTP API. But also has "GSQL"<br/>
+							TerminusDB has the document db API. https://terminusdb.com/docs/guides/reference-guides/document-interface .
+						</p>
 					</aside>
 				</section>
 
@@ -736,14 +770,14 @@
 					<h1>Embedded Storage Engine</h1>
 				</section>
 				<section>
-					<p>If:</p>
+					<p>Do you have an app like this?</p>
 					<ul>
 						<li>Multi-threaded app, low-latency goals</li>
 						<li>App doesn't share data with other app instances</li>
 						<li>Local filesystem durability is enough</li>
 						<li>Very low-frills query engine is OK</li>
 					</ul>
-					<p>Application can use an embedded storage engine</p>
+					<p>You can use an embedded storage engine</p>
 				</section>
 				<section>
 					<div>"Can't I just save app data to disk myself?"</div>
@@ -862,7 +896,16 @@
 						...
 					</code></pre>
 					<aside class="notes">
-						Sample above from https://www.sqlite.org/quickstart.html. Others also at https://github.com/berkeleydb/libdb/blob/master/examples/c/ex_access.c
+						<ul>
+							<li>Sample above from https://www.sqlite.org/quickstart.html. Others also at https://github.com/berkeleydb/libdb/blob/master/examples/c/ex_access.c</li>
+							<li>'Leanstore evolution' 2023 paper:<br>
+								3 LeanStore System Overview<br>
+								Functionality and System Overview. LeanStore is a storage engine supporting basic key
+								value operations (insert/update/delete, point/range lookup) and transactional semantics
+								(begin, commit, rollback). This functionality is exposed through a C++ interface, i.e., as an
+								embeddable library rather than a server process. Systems with comparable functionality
+								include RocksDB and WiredTiger, which are often used as building blocks for full-blown</li>
+						</ul>	
 					</aside>
 				</section>
 				<section>
@@ -881,23 +924,17 @@
 				</section>
 				<section>
 					<h2>Multi-model</h2>
-					<p>Data model in datastore a mixture of main types.</p>
-					<div>The application programmer's experience:</div>
-					<ul>
-						<li>Awkward, extra stuff added to original API<br>
-							&nbsp;or</li>
-						<li>Two competing APIs</li>
-					</ul>
+					<p>Data model in datastore is mixture of main types</p>
 				</section>
 				<section>
 					<p>"A little bit of this in that"</p>
-					<p>Eg. JSON-ish object data type in relational table field</p>
-					<p>Good for: Old app A is relational, but document style will suit new app B</p>
-					<!-- p>Eg. Graph extension in relational or document databases</p -->
+					<p>Eg. JSON-ish object data type in relational table field<br/>
+						Good for: Old app A is relational, but document style will suit new app B</p>
+					<p>Eg. Graph extension in relational or document databases</p>
 				</section>
 				<section>
 					<div>Eg. JSON_OBJECT in a MySQL table</div>
-					<pre><code data-trim>
+					<pre><code data-trim data-line-numbers="1-5,15|6-14|1-15">
 						INSERT INTO e_store.products (
 							name, brand_id, category_id, 
 							attributes
@@ -925,10 +962,10 @@
 						<li>Text search in database tables<br>
 							(simple tokenization of string; tokens &rightarrow; record)</li>
 					</ul>
-					<p>API additions were idiomatic with original API</p>
 				</section>
 				<section>
 					<h2>Competing APIs for same datastore</h2>
+					<p class="fragment">Rare, but deserve a special mention</p>
 				</section>
 				<section>
 					<p>Example for MySQL by ODBC</p>
@@ -949,7 +986,7 @@
 				</section>
 
 				<section><!-- "Pros and cons" -->
-					<h1>Pros and Cons of different API types</h1>
+					<h1>Feature group special mentions</h1>
 				</section>
 
 				<section><!-- Schema freedom -->
@@ -1037,8 +1074,8 @@
 				</section>
 				<section>
 					<h3>Some datastores have no A.P.</h3>
-					<div>By definition object stores, key-value stores, and fileystems provide no analytical processing</div>
-					<div>Client: fetch whole dataset, deserialize, run analytical function</div>
+					<p>By definition object stores, key-value stores, and fileystems provide no analytical processing</p>
+					<p>Client app: Fetch whole dataset, deserialize, run analytical function</p>
 				</section>
 				<section>
 					<h3>Minimal database: Basically no A.P.</h3>
@@ -1175,15 +1212,6 @@
 					</ul>
 				</section>
 				<section>
-					<p>Connections that stay open provide the best latency. No need to reestablish TCP connection or authentication context for each request sent. Multiple-operation transactions can be performed because the client connection has enough state.</p>
-				</section>
-				<section>
-					<p>Requests that use a new connection each time can be run without holding a TCP socket open indefinitely while the app runs. Less state allows broader network scenarios, eg. SaaS backends behind load balancers.</p>
-				</section>
-				<section>
-					<p>Client APIs that have automatic failover (eg. old primary lost, finds new primary automatically) provide a large benefit for business continuity goals. Options to auto-retry interrupted requests save the app developer from writing a lot of error handling.</p>
-				</section>
-				<section>
 					<ul>
 						<li>Custom wire protocol over TCP</li>
 						<li>HTTP1.x</li>
@@ -1191,12 +1219,26 @@
 						<ul>
 							<li>GRPC</li>
 						</ul>
+						<!-- TODO is this list complete? Which datastore was GRPC used with again? Other than Kafka -->
 					</ul>
 				</section>
 				<section>
+					<p>Connections that stay open provide the best latency</p>
+					<p>A TCP connection is also simple way to support session state</p>
+				</section>
+				<section>
+					<p>Stateless, always-reconnecting protocols have higher latency, and authentication has extra work</p>
+					<p>Simple proxies like HTTP load balancer can be used if datastore has 'weaker' consistency</p>
+					<!-- p>Requests that use a new connection each time can be run without holding a TCP socket open indefinitely while the app runs. Less state allows broader network scenarios, eg. SaaS backends behind load balancers.</p -->
+				</section>
+				<section>
+					<p>Client APIs that have automatic failover provide a large benefit for business continuity goals.</p>
+					<p>Options to auto-retry interrupted requests save the app developer from writing a lot of error handling.</p>
+				</section>
+				<!--section>
 					<p>Databases that have replication (primary+secondaries, or 'multi-master', or master+slave, main+standby, etc) often support rolling restart procedures. <b>This is a very important cost-of-operations advantage.</b></p>
 					<p>If the client API seamlessly switches to new primary as the role changes during maintenance restarts you gain a huge operational advantage: DBAs can do maintenance such as upscaling to new servers, upgrading versions etc. without shutting down the frontend application. I.e. without stopping the business or dragging the app dev team into the task.</p>
-				</section>
+				</section -->
 				<section>
 					<h2>Connection Security</h2>
 					<ul>
@@ -1215,77 +1257,80 @@
 					<h1>Client-side encryption</h1>
 				</section>
 				<section>
+					<p>Recent addition to at least one popular datastore</p>
+					<ul>
+						<li>Use a KMS that the client connects to independently of the datastore</li>
+						<li>Encrypt data before writing to datastore; decrypt after retrieving from datastore</li>
+					</ul>
+					<p>Not a feature of the datastore - all built into the client-side API</p>
+				</section>
+				<!-- section>
 					<p>To protect against information theft an application can store already-encrypted data in the database / datastore. Hacking the database server, or its backups, becomes pointless.</p>
 					<p>Something to consider for applications that have security requirements so high they can't even trust the DBA team / DBAAS provider.</p>
 					<p>Storing encrypted data makes the database 'dumber' though. Eg. querying a record set by range X1 to X2 cannot use efficient index lookup if "X" is an encrypted value</p>
-				</section>
+				</!section>
 				<section>
 					<p>A few database APIs have added the crypto functions to the database API itself. This is an alternative to using a general-purpose crypto library to manually do the encryption and decryption steps.</p>
 					<p>The API cannot auto-magic the work away though. The tech debt rises just as much as if you do manual encryption. The main burden is the key management, i.e. the IT security team needs to manage the certs and distribute new and periodically renewed certs to the application servers, and the application team have to work with them when they do that.</p>
-				</section>
+				</section -->
 
 				<section><!-- Data model -->
 					<h2>Data model</h2>
 				</section>
 				<section>
-					<div>For most datastores the data model has strong influence on API</div>
+					<p>For most datastores the data model has strong influence on API</p>
 					<ul>For example:
 						<li>Graph DB: Edges, vertices part of fundamental syntax</li>
 						<li>Object or KV store: Limited ops = small API</li>
 					</ul>
-					<div>These shown in the previous 'Look and feel' section.</div>
+					<p>These shown in the previous 'Look and feel' section.</p>
 				</section>
 				<section>
-					<div>Data model type usually determines API type.</div>
-					<div>One important exception: These 2 data models are common in SQL-using databases</div>
+					<p>Data model type usually determines API type.</p>
+					<p>Most notable exception: These 2 data models are common in SQL-using databases</p>
 					<ul>
 						<li>Standard: Row-based, fixed field structures</li>
 						<li>Column-based: Columns kept in sequential datastructures</li>
 					</ul>
-					<div>The same SQL can be used with both. OLTP will be faster with row-based; OLAP can be much faster with column-based </div>
+					<!-- div>The same SQL can be used with both. OLTP will be faster with row-based; OLAP can be much faster with column-based </div -->
 				</section>
 				<section>
-					<div>Write and read performance in the datastore strongly affected by data model</div>
-					<div>Back-end latency is not a property of the API, so not in scope for this presentation.</div>
-					<div>There will be a different lesson.</div>
+					<p>Write and read performance in the datastore<br><i>strongly affected</i> by data model</p>
 				</section>
 
 				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)"><!-- Summary -->
 					<h1>Client APIs Summary</h1>
 				</section>
 
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
+				<section data-auto-animate>
 					<p>Datastore Client APIs ...</p>
 				</section>
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
+				<section data-auto-animate>
 					<p>Datastore Client APIs ...</p>
-					<p>differ more than you realize.</p>
+					<p>have a lot of variety</p>
 				</section>
 
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
-					<p>Datastore API choice exists!</p>
+				<section data-auto-animate>
+					<p>Datastore API choice exists</p>
 				</section>
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
-					<p>Datastore API choice exists!</p>
-					<p>Big differences in:</p>
+				<section data-auto-animate>
+					<p>Datastore API choice exists</p>
+					<p>But it is not just 'flavor'</p>
 				</section>
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
-					<p>Datastore API choice exists!</p>
+				<section data-auto-animate>
 					<p>Big differences in:</p>
 					<ul>
 						<li>App development ease</li>
 					</ul>
 				</section>
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
-					<p>Datastore API choice exists!</p>
+				<section data-auto-animate>
 					<p>Big differences in:</p>
 					<ul>
 						<li>App development ease</li>
 						<li>Deployment ease</li>
 					</ul>
 				</section>
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
-					<p>Datastore API choice exists!</p>
+				<section data-auto-animate>
 					<p>Big differences in:</p>
 					<ul>
 						<li>App development ease</li>
@@ -1293,16 +1338,29 @@
 						<li>Uptime guarantees</li>
 					</ul>
 				</section>
+				<section data-auto-animate>
+					<p>Big differences in:</p>
+					<ul>
+						<li>App development ease</li>
+						<li>Deployment ease</li>
+						<li>Uptime guarantees</li>
+						<li>Security coverage</li>
+					</ul>
+				</section>
 
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
+				<section data-auto-animate>
 					<p>Datastore API choice does NOT exist after</p>
 					<p>the backend datastore has been chosen.</p>
 				</section>
 
-				<section data-background-gradient="radial-gradient(#283b95, #17b2c3)" data-auto-animate>
-					<p>So before a datastore is decided in a new project<br>
-						DON'T WASTE OPPORTUNITY<br>
+				<section data-auto-animate>
+					<p>So before a datastore is decided<br>
+						<b>don't waste opportunity</b><br>
 						to judge datastores by client API style as well.</p>
+				</section>
+
+				<section>
+					<div>&mdash;</div>
 				</section>
 
 			</div>

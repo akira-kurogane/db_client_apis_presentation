@@ -116,6 +116,91 @@ section.has-light-background, section.has-light-background h1, section.has-light
   text-shadow: var(--r-heading1-text-shadow);
 }
 
+
+/*********
+ * AKIRA
+ *********/
+ html body {
+}
+html body.content-1 {
+  background-image: url("../../css/marionete_2020_templates_backgrounds/content_1.jpg");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+html body.content-2 {
+  background-image: url("../../css/marionete_2020_templates_backgrounds/content_2.jpg");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #fff;
+}
+html body.content-3 {
+  background-image: url("../../css/marionete_2020_templates_backgrounds/content_3.jpg");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #fff;
+}
+html body.title-1 {
+  background-image: url("../../css/marionete_2020_templates_backgrounds/title_1.jpg");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #000721;
+}
+html body.title-2 {
+  background-image: url("../../css/marionete_2020_templates_backgrounds/title_2.jpg");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #f1f1f1;
+}
+html body.title-1 div.slides section.slide {
+  color: white;
+  right: 30%;
+}
+html body.main-divider-1 {
+  background-image: url("../../css/marionete_2020_templates_backgrounds/main_divider_1.jpg");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #323134;
+}
+html body.main-divider-2 {
+  background-image: url("../../css/marionete_2020_templates_backgrounds/main_divider_2.jpg");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #f1f1f1;
+}
+html body.end-1 {
+  background-image: url("../../css/marionete_2020_templates_backgrounds/end_1.jpg");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #f1f1f1;
+}
+
+.title-1 .reveal h1 {
+  text-shadow: 0 0 3px #323134;
+  font-size: 3em;
+  margin-right: 30%;
+}
+.title-1 .reveal p {
+  margin-right: 30%;
+}
+.main-divider-2 h1,
+.main-divider-2 h2 {
+  color: #60409b;
+  font-size: 2.4em;
+}
+
+.footnote {
+  color: #a7a9ac;
+  font-size: 70%;
+}
+
 /*********************************************
  * OTHER
  *********************************************/
