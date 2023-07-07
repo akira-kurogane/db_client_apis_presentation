@@ -111,7 +111,10 @@
 				</section>
 				<section>
 					<h2>Developer (un)productivity</h2>
-					<p>No matter which app, the purpose and style of the application's code is not the same as the interface of datastore's API. This friction breaks the developer's concentration and slows the release time of every update that changes the datastore interaction.​</p>
+				</section>
+				<section>
+					<p>No matter which app, the <i>purpose and style</i> of the application's code is not the same as the interface of datastore's API.</p>
+					<p>This <i>friction</i> breaks the developer's concentration and slows the release time of every update that changes the datastore interaction.​</p>
 				</section>
 				<section>
 					<p>The disruption level varies according to which API is being used.</p>
@@ -342,8 +345,8 @@
 					<h3>SQL summary</h3>
 					<ul>
 						<li>DB schema change deployments slow</li>
-						<li><b>App programmer sees the DB as rigid</b></li>
-						<li>Multi-table transactions the norm</li>
+						<li>App programmer sees the DB as rigid</li>
+						<li>Slow multi-table transactions the norm</li>
 						<!-- li>Generic programming around SQL difficult</li -->
 					</ul>
 					<aside class="notes">
@@ -411,7 +414,7 @@
 				<section>
 					<ul>
 						<li>APIs idiomatic with app language</li>
-						<li>But each database's API has a different syntax</li>
+						<li>Individual APIs for each doc db</li>
 						<li>Free field schema</li>
 						<li>Automatic table creation, incl. default PK</li>
 					</ul>
@@ -606,7 +609,7 @@
 					</aside>
 				</section>
 				<section>
-					<div>The timeseries key datatype is a series of {timestamp, numeric value} pairs</div>
+					<div>The timeseries key datatype is a series of<br/>{timestamp, numeric value} pairs</div>
 					<div>Series has a name and type (gauge or counter), and extra fields (labels) for filtering / grouping later</div>
 				</section>
 				<!-- section>
@@ -727,17 +730,18 @@
 					<h1>Graph database</h1>
 				</section>
 				<section>
-					<pre><code>
-						// Connection etc. The same as SQL or a document db API
+					<pre><code data-trim>
+						-- Connection etc. The same as SQL or a document db API
 						
 						p1 = [10320, "smith", "john"]
 						db.execute("INSERT People (?)", new_p) 
 						t1 = ["ACME", "UK", "Risk"]
 						db.execute("INSERT TeamMembership(?, ?)", p1, t1))
 
-						person_cur = db.execute('SELECT Person-[TeamMembership]->Team(%s)', t1); ④​
+						person_cur = db.execute(
+							'SELECT Person-[TeamMembership]->Team(?)', t1);
 						print(person_cur.fetchone())
-						> (10414, "kelly", "jane")
+						-- (10414, "kelly", "jane")
 					</code></pre>
 					<aside class="notes">
 						<pre>
@@ -777,10 +781,13 @@
 						<li>Local filesystem durability is enough</li>
 						<li>Very low-frills query engine is OK</li>
 					</ul>
-					<p>You can use an embedded storage engine</p>
+				</section>
+				<section>
+					<p>If "Yes", you can use an embedded storage engine</p>
 				</section>
 				<section>
 					<div>"Can't I just save app data to disk myself?"</div>
+					<p class="fragment">Yes, but if you use the prebuilt storage engine ...</p>
 				</section>
 				<section>
 					<ul>
@@ -986,7 +993,7 @@
 				</section>
 
 				<section><!-- "Pros and cons" -->
-					<h1>Feature group special mentions</h1>
+					<h1>Review of Main features</h1>
 				</section>
 
 				<section><!-- Schema freedom -->
@@ -994,9 +1001,9 @@
 				</section>
 				<section>
 					<p>Some datastores restrict the schema, some don't.</p>
-					<p>Unknown field &RightArrow; Reject &RightArrow; client runtime error</p>
+					<p style="font-family: monospace; font-size: 80%;">Unknown field &RightArrow; Reject &RightArrow; client runtime error</p>
 					<p>vs.</p>
-					<p>Unknown field &RightArrow; Accept&semi;<br>Surprise new field for other clients</p>
+					<p style="font-family: monospace; font-size: 80%;">Unknown field &RightArrow; Accept&semi;<br>Surprise new field for other clients</p>
 					<aside class="notes">
 						If applications insert a record that has an unknown field or is missing a field that is mandatory the entire request will be rejected and exception sent back to the client application.
 						Relational databases are well-known for popularizing schema control.
@@ -1006,6 +1013,7 @@
 					<h4>Positives of server-side locked schema</h4>
 					<ul>
 						<li>All applications obey a single schema orthodoxy</li>
+						<li>Cross-table parent-child relationships can be enforced</li>
 					</ul>
 				</section>
 				<section>
@@ -1283,7 +1291,7 @@
 						<li>Graph DB: Edges, vertices part of fundamental syntax</li>
 						<li>Object or KV store: Limited ops = small API</li>
 					</ul>
-					<p>These shown in the previous 'Look and feel' section.</p>
+					<!-- p>These shown in the previous 'Look and feel' section.</p -->
 				</section>
 				<section>
 					<p>Data model type usually determines API type.</p>
